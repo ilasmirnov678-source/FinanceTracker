@@ -1,0 +1,23 @@
+# Сборка и артефакты
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+
+# База данных и отчёты
+*.db
+report.png
+
+# Python
+PythonApp/venv/
+PythonApp/__pycache__/
+*.pyc
+requirements.txt
+
+# IDE и ОС
+.idea/
+*.swp
+Thumbs.db
