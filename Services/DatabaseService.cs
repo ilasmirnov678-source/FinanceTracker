@@ -21,7 +21,9 @@ public class DatabaseService
     // Конструктор с опциональным путём к БД.
     public DatabaseService(string? dbPath = null)
     {
-        _dbPath = dbPath ?? "Database/finance.db";
+        var path = dbPath ?? "Database/finance.db";
+        // Преобразовать относительный путь в абсолютный, если нужно.
+        _dbPath = Path.IsPathRooted(path) ? path : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
         
         // Создать директорию для БД, если её нет.
         var directory = Path.GetDirectoryName(_dbPath);
@@ -45,21 +47,30 @@ public class DatabaseService
     // Инициализировать базу данных: создать файл и выполнить schema.sql.
     private void InitializeDatabase()
     {
-        using var connection = new SqliteConnection(ConnectionString);
-        connection.Open();
-        
-        var sql = ReadSchemaSql();
-        // Разделить SQL-команды по точке с запятой и выполнить каждую.
-        var commands = sql.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        
-        foreach (var commandText in commands)
+        try
         {
-            if (string.IsNullOrWhiteSpace(commandText))
-                continue;
+            using var connection = new SqliteConnection(ConnectionString);
+            connection.Open();
             
-            using var command = connection.CreateCommand();
-            command.CommandText = commandText;
-            command.ExecuteNonQuery();
+            var sql = ReadSchemaSql();
+            // Разделить SQL-команды по точке с запятой и выполнить каждую.
+            var commands = sql.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            
+            foreach (var commandText in commands)
+            {
+                // Пропустить пустые строки и комментарии.
+                var trimmed = commandText.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith("--"))
+                    continue;
+                
+                using var command = connection.CreateCommand();
+                command.CommandText = trimmed;
+                command.ExecuteNonQuery();
+            }
+        }
+        catch (SqliteException ex)
+        {
+            throw new InvalidOperationException($"Ошибка при инициализации базы данных: {ex.Message}", ex);
         }
     }
 }
