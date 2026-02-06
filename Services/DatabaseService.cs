@@ -1,4 +1,5 @@
 using System.IO;
+using Microsoft.Data.Sqlite;
 
 namespace FinanceTracker.Services;
 
@@ -21,6 +22,15 @@ public class DatabaseService
     public DatabaseService(string? dbPath = null)
     {
         _dbPath = dbPath ?? "Database/finance.db";
+        
+        // Создать директорию для БД, если её нет.
+        var directory = Path.GetDirectoryName(_dbPath);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            Directory.CreateDirectory(directory);
+        
+        // Инициализировать БД, если файл не существует.
+        if (!File.Exists(_dbPath))
+            InitializeDatabase();
     }
 
     // Прочитать SQL-скрипт из файла schema.sql.
@@ -30,5 +40,26 @@ public class DatabaseService
         if (!File.Exists(schemaPath))
             throw new FileNotFoundException($"Файл schema.sql не найден по пути: {schemaPath}", schemaPath);
         return File.ReadAllText(schemaPath);
+    }
+
+    // Инициализировать базу данных: создать файл и выполнить schema.sql.
+    private void InitializeDatabase()
+    {
+        using var connection = new SqliteConnection(ConnectionString);
+        connection.Open();
+        
+        var sql = ReadSchemaSql();
+        // Разделить SQL-команды по точке с запятой и выполнить каждую.
+        var commands = sql.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        
+        foreach (var commandText in commands)
+        {
+            if (string.IsNullOrWhiteSpace(commandText))
+                continue;
+            
+            using var command = connection.CreateCommand();
+            command.CommandText = commandText;
+            command.ExecuteNonQuery();
+        }
     }
 }
