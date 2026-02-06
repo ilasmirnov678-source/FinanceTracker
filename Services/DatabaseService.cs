@@ -6,14 +6,10 @@ namespace FinanceTracker.Services;
 // Сервис для инициализации и управления подключением к базе данных SQLite.
 public class DatabaseService
 {
-    private string _dbPath;
+    private readonly string _dbPath;
 
     // Путь к файлу базы данных.
-    public string DbPath
-    {
-        get => _dbPath;
-        set => _dbPath = value ?? throw new ArgumentNullException(nameof(value));
-    }
+    public string DbPath => _dbPath;
 
     // Строка подключения к базе данных.
     public string ConnectionString => "Data Source=" + _dbPath;
@@ -22,17 +18,40 @@ public class DatabaseService
     public DatabaseService(string? dbPath = null)
     {
         var path = dbPath ?? "Database/finance.db";
-        // Преобразовать относительный путь в абсолютный, если нужно.
-        _dbPath = Path.IsPathRooted(path) ? path : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
+        _dbPath = Path.IsPathRooted(path) 
+            ? path 
+            : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
         
-        // Создать директорию для БД, если её нет.
+        EnsureDirectoryExists();
+        EnsureDatabaseInitialized();
+    }
+
+    // Создать директорию для БД, если её нет.
+    private void EnsureDirectoryExists()
+    {
         var directory = Path.GetDirectoryName(_dbPath);
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        if (!string.IsNullOrEmpty(directory))
             Directory.CreateDirectory(directory);
-        
-        // Инициализировать БД, если файл не существует.
-        if (!File.Exists(_dbPath))
+    }
+
+    // Инициализировать БД, если нужно.
+    private void EnsureDatabaseInitialized()
+    {
+        if (!File.Exists(_dbPath) || !TableExists())
             InitializeDatabase();
+    }
+
+    // Проверить существование таблицы Transactions.
+    private bool TableExists()
+    {
+        if (!File.Exists(_dbPath))
+            return false;
+
+        using var connection = new SqliteConnection(ConnectionString);
+        connection.Open();
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT 1 FROM sqlite_master WHERE type='table' AND name='Transactions'";
+        return command.ExecuteScalar() != null;
     }
 
     // Прочитать SQL-скрипт из файла schema.sql.
@@ -47,30 +66,29 @@ public class DatabaseService
     // Инициализировать базу данных: создать файл и выполнить schema.sql.
     private void InitializeDatabase()
     {
-        try
+        using var connection = new SqliteConnection(ConnectionString);
+        connection.Open();
+        
+        var sql = ReadSchemaSql();
+        var commands = ParseSqlCommands(sql);
+        
+        foreach (var command in commands)
         {
-            using var connection = new SqliteConnection(ConnectionString);
-            connection.Open();
-            
-            var sql = ReadSchemaSql();
-            // Разделить SQL-команды по точке с запятой и выполнить каждую.
-            var commands = sql.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            
-            foreach (var commandText in commands)
-            {
-                // Пропустить пустые строки и комментарии.
-                var trimmed = commandText.Trim();
-                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith("--"))
-                    continue;
-                
-                using var command = connection.CreateCommand();
-                command.CommandText = trimmed;
-                command.ExecuteNonQuery();
-            }
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = command;
+            cmd.ExecuteNonQuery();
         }
-        catch (SqliteException ex)
-        {
-            throw new InvalidOperationException($"Ошибка при инициализации базы данных: {ex.Message}", ex);
-        }
+    }
+
+    // Распарсить SQL-скрипт: удалить комментарии и разделить на команды.
+    private IEnumerable<string> ParseSqlCommands(string sql)
+    {
+        return sql
+            .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
+            .Select(line => line.Trim())
+            .Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith("--"))
+            .SelectMany(line => line.Split(';', StringSplitOptions.RemoveEmptyEntries))
+            .Select(cmd => cmd.Trim())
+            .Where(cmd => !string.IsNullOrWhiteSpace(cmd));
     }
 }
