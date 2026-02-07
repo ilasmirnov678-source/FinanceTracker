@@ -3,12 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:FinanceTracker.Converters"
         mc:Ignorable="d"
-        Title="Добавить транзакцию" Height="280" Width="420"
+        Title="Добавить транзакцию" Height="320" Width="420"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
+    <Window.Resources>
+        <converters:DecimalConverter x:Key="DecimalConverter"/>
+    </Window.Resources>
     <Grid Margin="16">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -21,19 +28,22 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="Дата:" VerticalAlignment="Center" Margin="0,0,8,8"/>
-        <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding Date, Mode=TwoWay}" Margin="0,0,0,8"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Дата:" VerticalAlignment="Center" Margin="0,0,8,4"/>
+        <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding Date, Mode=TwoWay}" Margin="0,0,0,4"/>
+        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DateError}" Foreground="Red" FontSize="11" Margin="0,0,0,8"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Сумма:" VerticalAlignment="Center" Margin="0,0,8,8"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Amount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Сумма:" VerticalAlignment="Center" Margin="0,0,8,4"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Amount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DecimalConverter}}" Margin="0,0,0,4"/>
+        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AmountError}" Foreground="Red" FontSize="11" Margin="0,0,0,8"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Категория:" VerticalAlignment="Center" Margin="0,0,8,8"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Категория:" VerticalAlignment="Center" Margin="0,0,8,4"/>
+        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,4"/>
+        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CategoryError}" Foreground="Red" FontSize="11" Margin="0,0,0,8"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Описание:" VerticalAlignment="Center" Margin="0,0,8,8"/>
-        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="Описание:" VerticalAlignment="Center" Margin="0,0,8,4"/>
+        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
 
-        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
             <Button Content="Сохранить" Command="{Binding SaveCommand}" Margin="0,0,8,0" Padding="16,6" IsDefault="True"/>
             <Button Content="Отмена" Command="{Binding CancelCommand}" Padding="16,6" IsCancel="True"/>
         </StackPanel>

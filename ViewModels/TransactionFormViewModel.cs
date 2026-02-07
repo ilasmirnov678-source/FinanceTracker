@@ -13,7 +13,7 @@ public partial class TransactionFormViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
-    private DateTime _date;
+    private DateTime? _date;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -26,11 +26,38 @@ public partial class TransactionFormViewModel : ObservableObject
     [ObservableProperty]
     private string _description = string.Empty;
 
+    [ObservableProperty]
+    private string _dateError = string.Empty;
+
+    [ObservableProperty]
+    private string _amountError = string.Empty;
+
+    [ObservableProperty]
+    private string _categoryError = string.Empty;
+
     public TransactionFormViewModel(TransactionRepository repository, Action<bool?>? onCloseRequested = null)
     {
         _repository = repository;
         _onCloseRequested = onCloseRequested;
         _date = DateTime.Now.Date;
+        _dateError = string.Empty;
+        _amountError = "Сумма должна быть больше 0";
+        _categoryError = "Укажите категорию";
+    }
+
+    partial void OnDateChanged(DateTime? value)
+    {
+        DateError = value.HasValue ? string.Empty : "Укажите дату";
+    }
+
+    partial void OnAmountChanged(decimal value)
+    {
+        AmountError = value > 0 ? string.Empty : "Сумма должна быть больше 0";
+    }
+
+    partial void OnCategoryChanged(string value)
+    {
+        CategoryError = !string.IsNullOrWhiteSpace(value) ? string.Empty : "Укажите категорию";
     }
 
     // Сохранить транзакцию в БД и закрыть форму.
@@ -39,7 +66,7 @@ public partial class TransactionFormViewModel : ObservableObject
     {
         var transaction = new Transaction
         {
-            Date = Date,
+            Date = Date!.Value,
             Amount = Amount,
             Category = Category.Trim(),
             Description = Description?.Trim() ?? string.Empty
@@ -55,5 +82,5 @@ public partial class TransactionFormViewModel : ObservableObject
         _onCloseRequested?.Invoke(false);
     }
 
-    private bool CanSave() => Amount > 0 && !string.IsNullOrWhiteSpace(Category);
+    private bool CanSave() => Date.HasValue && Amount > 0 && !string.IsNullOrWhiteSpace(Category);
 }
