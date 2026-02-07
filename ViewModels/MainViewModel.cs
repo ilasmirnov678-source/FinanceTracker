@@ -33,6 +33,7 @@ public partial class MainViewModel : ObservableObject
         Transactions = new ObservableCollection<TransactionViewModel>();
         _startDateFilter = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
         _endDateFilter = DateTime.Now.Date;
+        RefreshCommand.Execute(null);
     }
 
     // Добавить транзакцию (реализация в следующем коммите).

@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using FinanceTracker.Services;
+using FinanceTracker.ViewModels;
 
 namespace FinanceTracker
 {
@@ -16,6 +18,9 @@ namespace FinanceTracker
         public MainWindow()
         {
             InitializeComponent();
+            var dbService = new DatabaseService();
+            var repository = new TransactionRepository(dbService.ConnectionString);
+            DataContext = new MainViewModel(repository);
         }
     }
 }
