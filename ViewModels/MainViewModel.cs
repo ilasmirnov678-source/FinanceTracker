@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using FinanceTracker.Services;
 
 namespace FinanceTracker.ViewModels;
@@ -14,6 +15,8 @@ public partial class MainViewModel : ObservableObject
 
     // Выбранная транзакция в списке (для редактирования и удаления).
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(EditTransactionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DeleteTransactionCommand))]
     private TransactionViewModel? _selectedTransaction;
 
     // Начало периода для фильтрации.
@@ -31,4 +34,34 @@ public partial class MainViewModel : ObservableObject
         _startDateFilter = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
         _endDateFilter = DateTime.Now.Date;
     }
+
+    // Добавить транзакцию (реализация в следующем коммите).
+    [RelayCommand]
+    private void AddTransaction()
+    {
+    }
+
+    // Редактировать выбранную транзакцию (реализация в следующем коммите).
+    [RelayCommand(CanExecute = nameof(CanEditOrDelete))]
+    private void EditTransaction()
+    {
+    }
+
+    // Удалить выбранную транзакцию (реализация в следующем коммите).
+    [RelayCommand(CanExecute = nameof(CanEditOrDelete))]
+    private void DeleteTransaction()
+    {
+    }
+
+    // Обновить список транзакций.
+    [RelayCommand]
+    private void Refresh()
+    {
+        Transactions.Clear();
+        var transactions = _repository.GetByDateRange(StartDateFilter, EndDateFilter);
+        foreach (var t in transactions)
+            Transactions.Add(new TransactionViewModel(t));
+    }
+
+    private bool CanEditOrDelete() => SelectedTransaction != null;
 }
