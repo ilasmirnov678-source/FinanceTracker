@@ -5,8 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FinanceTracker"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Finance Tracker" Height="450" Width="800" WindowState="Maximized">
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Transactions}"
+                  SelectedItem="{Binding SelectedTransaction, Mode=TwoWay}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  Margin="8">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Дата" Binding="{Binding Date, StringFormat=dd.MM.yyyy}" Width="100"/>
+                <DataGridTextColumn Header="Сумма" Binding="{Binding DisplayAmount}" Width="100"/>
+                <DataGridTextColumn Header="Категория" Binding="{Binding Category}" Width="*"/>
+                <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>
