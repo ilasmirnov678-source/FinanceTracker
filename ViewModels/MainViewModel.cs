@@ -65,4 +65,7 @@ public partial class MainViewModel : ObservableObject
     }
 
     private bool CanEditOrDelete() => SelectedTransaction != null;
+
+    partial void OnStartDateFilterChanged(DateTime value) => RefreshCommand.Execute(null);
+    partial void OnEndDateFilterChanged(DateTime value) => RefreshCommand.Execute(null);
 }
