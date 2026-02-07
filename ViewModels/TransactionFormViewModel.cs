@@ -9,6 +9,7 @@ namespace FinanceTracker.ViewModels;
 public partial class TransactionFormViewModel : ObservableObject
 {
     private readonly TransactionRepository _repository;
+    // Callback для закрытия окна с результатом (true — сохранено, false — отмена).
     private readonly Action<bool?>? _onCloseRequested;
 
     [ObservableProperty]
@@ -45,16 +46,19 @@ public partial class TransactionFormViewModel : ObservableObject
         _categoryError = "Укажите категорию";
     }
 
+    // Обновить сообщение об ошибке при изменении даты.
     partial void OnDateChanged(DateTime? value)
     {
         DateError = value.HasValue ? string.Empty : "Укажите дату";
     }
 
+    // Обновить сообщение об ошибке при изменении суммы.
     partial void OnAmountChanged(decimal value)
     {
         AmountError = value > 0 ? string.Empty : "Сумма должна быть больше 0";
     }
 
+    // Обновить сообщение об ошибке при изменении категории.
     partial void OnCategoryChanged(string value)
     {
         CategoryError = !string.IsNullOrWhiteSpace(value) ? string.Empty : "Укажите категорию";
@@ -82,5 +86,6 @@ public partial class TransactionFormViewModel : ObservableObject
         _onCloseRequested?.Invoke(false);
     }
 
+    // Форма валидна: дата указана, сумма > 0, категория не пуста.
     private bool CanSave() => Date.HasValue && Amount > 0 && !string.IsNullOrWhiteSpace(Category);
 }

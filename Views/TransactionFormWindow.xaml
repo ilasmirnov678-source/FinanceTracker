@@ -12,6 +12,7 @@
         <converters:DecimalConverter x:Key="DecimalConverter"/>
     </Window.Resources>
     <Grid Margin="16">
+        <!-- Поля формы: Дата, Сумма, Категория, Описание -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>

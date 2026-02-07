@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FinanceTracker.Services;
+using FinanceTracker.Views;
 
 namespace FinanceTracker.ViewModels;
 
@@ -36,10 +38,16 @@ public partial class MainViewModel : ObservableObject
         RefreshCommand.Execute(null);
     }
 
-    // Добавить транзакцию (реализация в следующем коммите).
+    // Добавить транзакцию.
     [RelayCommand]
     private void AddTransaction()
     {
+        var window = new TransactionFormWindow(_repository)
+        {
+            Owner = Application.Current.MainWindow
+        };
+        if (window.ShowDialog() == true)
+            RefreshCommand.Execute(null);
     }
 
     // Редактировать выбранную транзакцию (реализация в следующем коммите).

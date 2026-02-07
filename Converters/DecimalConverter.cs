@@ -6,6 +6,7 @@ namespace FinanceTracker.Converters;
 // Конвертер для привязки TextBox к decimal.
 public class DecimalConverter : IValueConverter
 {
+    // decimal -> string для отображения в TextBox.
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is decimal d)
@@ -13,6 +14,7 @@ public class DecimalConverter : IValueConverter
         return string.Empty;
     }
 
+    // string -> decimal при вводе; при некорректном вводе возвращает 0.
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is string s && decimal.TryParse(s.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
