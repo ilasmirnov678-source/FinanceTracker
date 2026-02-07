@@ -18,7 +18,7 @@ public partial class TransactionFormViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
-    private decimal _amount;
+    private decimal? _amount;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -42,36 +42,47 @@ public partial class TransactionFormViewModel : ObservableObject
         _onCloseRequested = onCloseRequested;
         _date = DateTime.Now.Date;
         _dateError = string.Empty;
-        _amountError = "Сумма должна быть больше 0";
-        _categoryError = "Укажите категорию";
+        _amountError = string.Empty;
+        _categoryError = string.Empty;
     }
 
-    // Обновить сообщение об ошибке при изменении даты.
+    // Очистить ошибку даты при исправлении поля.
     partial void OnDateChanged(DateTime? value)
     {
-        DateError = value.HasValue ? string.Empty : "Укажите дату";
+        if (value.HasValue)
+            DateError = string.Empty;
     }
 
-    // Обновить сообщение об ошибке при изменении суммы.
-    partial void OnAmountChanged(decimal value)
+    // Очистить ошибку суммы при исправлении поля.
+    partial void OnAmountChanged(decimal? value)
     {
-        AmountError = value > 0 ? string.Empty : "Сумма должна быть больше 0";
+        if (value.HasValue && value.Value > 0)
+            AmountError = string.Empty;
     }
 
-    // Обновить сообщение об ошибке при изменении категории.
+    // Очистить ошибку категории при исправлении поля.
     partial void OnCategoryChanged(string value)
     {
-        CategoryError = !string.IsNullOrWhiteSpace(value) ? string.Empty : "Укажите категорию";
+        if (!string.IsNullOrWhiteSpace(value))
+            CategoryError = string.Empty;
     }
 
     // Сохранить транзакцию в БД и закрыть форму.
-    [RelayCommand(CanExecute = nameof(CanSave))]
+    [RelayCommand]
     private void Save()
     {
+        // Валидация при попытке сохранения.
+        DateError = Date.HasValue ? string.Empty : "Укажите дату";
+        AmountError = Amount.HasValue && Amount.Value > 0 ? string.Empty : "Сумма должна быть больше 0";
+        CategoryError = !string.IsNullOrWhiteSpace(Category) ? string.Empty : "Укажите категорию";
+
+        if (!CanSave())
+            return;
+
         var transaction = new Transaction
         {
             Date = Date!.Value,
-            Amount = Amount,
+            Amount = Amount!.Value,
             Category = Category.Trim(),
             Description = Description?.Trim() ?? string.Empty
         };
@@ -87,5 +98,5 @@ public partial class TransactionFormViewModel : ObservableObject
     }
 
     // Форма валидна: дата указана, сумма > 0, категория не пуста.
-    private bool CanSave() => Date.HasValue && Amount > 0 && !string.IsNullOrWhiteSpace(Category);
+    private bool CanSave() => Date.HasValue && Amount.HasValue && Amount.Value > 0 && !string.IsNullOrWhiteSpace(Category);
 }
