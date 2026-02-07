@@ -11,6 +11,13 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="8">
+            <Button Content="Добавить" Command="{Binding AddTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
+            <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
+            <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
+            <Button Content="Обновить" Command="{Binding RefreshCommand}" Margin="0,0,8,0" Padding="12,6"/>
+            <Button Content="Создать отчёт" Margin="0,0,8,0" Padding="12,6"/>
+        </StackPanel>
         <DataGrid Grid.Row="1"
                   ItemsSource="{Binding Transactions}"
                   SelectedItem="{Binding SelectedTransaction, Mode=TwoWay}"
