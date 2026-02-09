@@ -63,10 +63,19 @@ public partial class MainViewModel : ObservableObject
             RefreshCommand.Execute(null);
     }
 
-    // Удалить выбранную транзакцию (реализация в следующем коммите).
+    // Удалить выбранную транзакцию.
     [RelayCommand(CanExecute = nameof(CanEditOrDelete))]
     private void DeleteTransaction()
     {
+        if (SelectedTransaction == null) return;
+        if (MessageBox.Show(
+                $"Удалить транзакцию от {SelectedTransaction.Date:dd.MM.yyyy} ({SelectedTransaction.Amount:N2} руб., {SelectedTransaction.Category})?",
+                "Подтверждение удаления",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+        _repository.Delete(SelectedTransaction.Id);
+        RefreshCommand.Execute(null);
     }
 
     // Обновить список транзакций.
