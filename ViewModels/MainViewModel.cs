@@ -50,10 +50,17 @@ public partial class MainViewModel : ObservableObject
             RefreshCommand.Execute(null);
     }
 
-    // Редактировать выбранную транзакцию (реализация в следующем коммите).
+    // Редактировать выбранную транзакцию.
     [RelayCommand(CanExecute = nameof(CanEditOrDelete))]
     private void EditTransaction()
     {
+        if (SelectedTransaction == null) return;
+        var window = new TransactionFormWindow(_repository, SelectedTransaction.Model)
+        {
+            Owner = Application.Current.MainWindow
+        };
+        if (window.ShowDialog() == true)
+            RefreshCommand.Execute(null);
     }
 
     // Удалить выбранную транзакцию (реализация в следующем коммите).

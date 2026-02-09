@@ -1,16 +1,17 @@
 using System.Windows;
+using FinanceTracker.Models;
 using FinanceTracker.Services;
 using FinanceTracker.ViewModels;
 
 namespace FinanceTracker.Views;
 
-// Окно добавления новой транзакции.
+// Окно добавления или редактирования транзакции.
 public partial class TransactionFormWindow : Window
 {
-    public TransactionFormWindow(TransactionRepository repository)
+    public TransactionFormWindow(TransactionRepository repository, Transaction? existingTransaction = null)
     {
         InitializeComponent();
-        DataContext = new TransactionFormViewModel(repository, OnCloseRequested);
+        DataContext = new TransactionFormViewModel(repository, OnCloseRequested, existingTransaction);
     }
 
     // Установить DialogResult и закрыть окно (вызывается из ViewModel).

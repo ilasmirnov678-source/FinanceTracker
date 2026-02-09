@@ -11,6 +11,8 @@ public partial class TransactionFormViewModel : ObservableObject
     private readonly TransactionRepository _repository;
     // Callback для закрытия окна с результатом (true — сохранено, false — отмена).
     private readonly Action<bool?>? _onCloseRequested;
+    // Id существующей транзакции при редактировании; null при добавлении.
+    private readonly int? _existingId;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -36,11 +38,24 @@ public partial class TransactionFormViewModel : ObservableObject
     [ObservableProperty]
     private string _categoryError = string.Empty;
 
-    public TransactionFormViewModel(TransactionRepository repository, Action<bool?>? onCloseRequested = null)
+    public TransactionFormViewModel(TransactionRepository repository, Action<bool?>? onCloseRequested = null, Transaction? existingTransaction = null)
     {
         _repository = repository;
         _onCloseRequested = onCloseRequested;
-        _date = DateTime.Now.Date;
+        _existingId = existingTransaction?.Id;
+
+        if (existingTransaction != null)
+        {
+            _date = existingTransaction.Date;
+            _amount = existingTransaction.Amount;
+            _category = existingTransaction.Category;
+            _description = existingTransaction.Description ?? string.Empty;
+        }
+        else
+        {
+            _date = DateTime.Now.Date;
+        }
+
         _dateError = string.Empty;
         _amountError = string.Empty;
         _categoryError = string.Empty;
@@ -81,12 +96,18 @@ public partial class TransactionFormViewModel : ObservableObject
 
         var transaction = new Transaction
         {
+            Id = _existingId ?? 0,
             Date = Date!.Value,
             Amount = Amount!.Value,
             Category = Category.Trim(),
             Description = Description?.Trim() ?? string.Empty
         };
-        _repository.Add(transaction);
+
+        if (_existingId.HasValue)
+            _repository.Update(transaction);
+        else
+            _repository.Add(transaction);
+
         _onCloseRequested?.Invoke(true);
     }
 
