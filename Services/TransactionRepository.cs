@@ -4,7 +4,7 @@ using FinanceTracker.Models;
 namespace FinanceTracker.Services;
 
 // Репозиторий для работы с таблицей Transactions. Не создаёт БД и таблицы.
-public class TransactionRepository
+public class TransactionRepository : ITransactionRepository
 {
     private readonly string _connectionString;
 

@@ -8,7 +8,7 @@ namespace FinanceTracker.ViewModels;
 // ViewModel формы добавления транзакции.
 public partial class TransactionFormViewModel : ObservableObject
 {
-    private readonly TransactionRepository _repository;
+    private readonly ITransactionRepository _repository;
     // Callback для закрытия окна с результатом (true — сохранено, false — отмена).
     private readonly Action<bool?>? _onCloseRequested;
     // Id существующей транзакции при редактировании; null при добавлении.
@@ -38,7 +38,7 @@ public partial class TransactionFormViewModel : ObservableObject
     [ObservableProperty]
     private string _categoryError = string.Empty;
 
-    public TransactionFormViewModel(TransactionRepository repository, Action<bool?>? onCloseRequested = null, Transaction? existingTransaction = null)
+    public TransactionFormViewModel(ITransactionRepository repository, Action<bool?>? onCloseRequested = null, Transaction? existingTransaction = null)
     {
         _repository = repository;
         _onCloseRequested = onCloseRequested;

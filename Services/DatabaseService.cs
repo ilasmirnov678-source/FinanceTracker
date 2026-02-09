@@ -83,11 +83,13 @@ public class DatabaseService
     // Распарсить SQL-скрипт: удалить комментарии и разделить на команды.
     private IEnumerable<string> ParseSqlCommands(string sql)
     {
-        return sql
+        var lines = sql
             .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
             .Select(line => line.Trim())
-            .Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith("--"))
-            .SelectMany(line => line.Split(';', StringSplitOptions.RemoveEmptyEntries))
+            .Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith("--"));
+        var fullSql = string.Join("\n", lines);
+        return fullSql
+            .Split(';', StringSplitOptions.RemoveEmptyEntries)
             .Select(cmd => cmd.Trim())
             .Where(cmd => !string.IsNullOrWhiteSpace(cmd));
     }

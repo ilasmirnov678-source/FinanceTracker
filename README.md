@@ -2,6 +2,17 @@
 
 WPF-приложение для учёта личных финансов с хранением данных в SQLite и аналитикой через Python (Pandas, Matplotlib).
 
+## Тестирование
+
+```bash
+dotnet test
+```
+
+Или только тестовый проект:
+```bash
+dotnet test FinanceTracker.Tests
+```
+
 ## Требования
 
 - .NET 8 — основное приложение (WPF)

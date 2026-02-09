@@ -11,7 +11,7 @@ using System.Windows.Shapes;
 using FinanceTracker.Services;
 using FinanceTracker.ViewModels;
 
-namespace FinanceTracker
+namespace FinanceTracker.Views
 {
     public partial class MainWindow : Window
     {

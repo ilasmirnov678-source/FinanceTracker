@@ -8,7 +8,7 @@ namespace FinanceTracker.Views;
 // Окно добавления или редактирования транзакции.
 public partial class TransactionFormWindow : Window
 {
-    public TransactionFormWindow(TransactionRepository repository, Transaction? existingTransaction = null)
+    public TransactionFormWindow(ITransactionRepository repository, Transaction? existingTransaction = null)
     {
         InitializeComponent();
         DataContext = new TransactionFormViewModel(repository, OnCloseRequested, existingTransaction);

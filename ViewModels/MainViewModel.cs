@@ -10,7 +10,7 @@ namespace FinanceTracker.ViewModels;
 // ViewModel главного окна.
 public partial class MainViewModel : ObservableObject
 {
-    private readonly TransactionRepository _repository;
+    private readonly ITransactionRepository _repository;
 
     // Коллекция транзакций для отображения в UI.
     public ObservableCollection<TransactionViewModel> Transactions { get; }
@@ -29,7 +29,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private DateTime _endDateFilter;
 
-    public MainViewModel(TransactionRepository repository)
+    public MainViewModel(ITransactionRepository repository)
     {
         _repository = repository;
         Transactions = new ObservableCollection<TransactionViewModel>();
