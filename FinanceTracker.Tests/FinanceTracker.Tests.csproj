@@ -27,6 +27,10 @@
     <Content Include="..\Database\schema.sql" Link="Database\schema.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Update="..\PythonApp\analyzer.py">
+      <Link>PythonApp\analyzer.py</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

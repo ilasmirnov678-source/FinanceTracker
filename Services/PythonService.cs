@@ -23,6 +23,13 @@ public class PythonService
         _scriptPath = Path.Combine(_baseDirectory, "PythonApp", "analyzer.py");
     }
 
+    // Для тестов: задаёт базовую директорию (например, без PythonApp для проверки FileNotFoundException).
+    internal PythonService(string baseDirectory)
+    {
+        _baseDirectory = baseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        _scriptPath = Path.Combine(_baseDirectory, "PythonApp", "analyzer.py");
+    }
+
     // Запускает analyzer.py с заданным путём к БД и периодом дат, возвращает результат аналитики.
     public async Task<AnalyticsResult> GenerateReportAsync(string dbPath, DateTime from, DateTime to, CancellationToken cancellationToken = default)
     {
@@ -74,7 +81,7 @@ public class PythonService
         return DeserializeResult(stdout);
     }
 
-    private static string ResolvePythonPath(string baseDir)
+    internal static string ResolvePythonPath(string baseDir)
     {
         string venvPython = Path.Combine(baseDir, "PythonApp", "venv", "Scripts", "python.exe");
         if (File.Exists(venvPython))
@@ -85,14 +92,14 @@ public class PythonService
     // Внешний вызов без инжекта baseDir использует поле _baseDirectory.
     private string ResolvePythonPath() => ResolvePythonPath(_baseDirectory);
 
-    private string BuildArguments(string dbPath, DateTime from, DateTime to)
+    internal string BuildArguments(string dbPath, DateTime from, DateTime to)
     {
         string fromStr = from.ToString("yyyy-MM-dd");
         string toStr = to.ToString("yyyy-MM-dd");
         return $"\"{_scriptPath}\" --db \"{dbPath}\" --from {fromStr} --to {toStr}";
     }
 
-    private static AnalyticsResult DeserializeResult(string json)
+    internal static AnalyticsResult DeserializeResult(string json)
     {
         if (string.IsNullOrWhiteSpace(json))
             throw new InvalidOperationException("Анализатор не вернул данные (пустой вывод).");
