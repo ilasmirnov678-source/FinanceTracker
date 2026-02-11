@@ -165,4 +165,23 @@ public class MainViewModelTests
         capturedTo.Should().Be(new DateTime(2025, 2, 20));
         mockPython.Verify(p => p.GenerateReportAsync(dbPath, vm.ReportStartDate, vm.ReportEndDate, It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task GenerateReportCommand_WhenServiceThrows_SetsReportErrorAndClearsIsReportGenerating()
+    {
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var mockPython = new Mock<IPythonService>();
+        const string errorMessage = "Таймаут выполнения анализатора (15 с).";
+        mockPython.Setup(p => p.GenerateReportAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException(errorMessage));
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, "test.db");
+
+        vm.GenerateReportCommand.Execute(null);
+        await Task.Delay(500);
+
+        vm.ReportError.Should().Be(errorMessage);
+        vm.IsReportGenerating.Should().BeFalse();
+    }
 }
