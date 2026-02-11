@@ -31,7 +31,7 @@ public class PythonService : IPythonService
         _scriptPath = Path.Combine(_baseDirectory, AppConstants.PythonAppFolder, AppConstants.AnalyzerScriptName);
     }
 
-    // Запускает analyzer.py с заданным путём к БД и периодом дат, возвращает результат аналитики.
+    // Запускает analyzer.py (путь к БД, период from–to), таймаут по константе; читает stdout/stderr, парсит JSON в AnalyticsResult. Выбрасывает FileNotFoundException, InvalidOperationException (таймаут, ненулевой exit code, ошибка парсинга), OperationCanceledException при отмене токена.
     public async Task<AnalyticsResult> GenerateReportAsync(string dbPath, DateTime from, DateTime to, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(_scriptPath))
@@ -91,6 +91,7 @@ public class PythonService : IPythonService
         return DeserializeResult(stdout);
     }
 
+    // Сначала venv в PythonApp (Scripts/python.exe), иначе исполняемый "python" из PATH.
     internal static string ResolvePythonPath(string baseDir)
     {
         string venvPython = Path.Combine(baseDir, AppConstants.PythonAppFolder, AppConstants.VenvFolder, AppConstants.VenvScriptsFolder, AppConstants.PythonExeName);
@@ -102,6 +103,7 @@ public class PythonService : IPythonService
     // Внешний вызов без инжекта baseDir использует поле _baseDirectory.
     private string ResolvePythonPath() => ResolvePythonPath(_baseDirectory);
 
+    // Строка аргументов для analyzer.py: путь к скрипту, --db, --from (yyyy-MM-dd), --to (yyyy-MM-dd).
     internal string BuildArguments(string dbPath, DateTime from, DateTime to)
     {
         string fromStr = from.ToString("yyyy-MM-dd");
@@ -109,6 +111,7 @@ public class PythonService : IPythonService
         return $"\"{_scriptPath}\" {AppConstants.CliArgDb} \"{dbPath}\" {AppConstants.CliArgFrom} {fromStr} {AppConstants.CliArgTo} {toStr}";
     }
 
+    // Парсит JSON в AnalyticsResult (контракт: by_category, by_month, total). InvalidOperationException при пустом выводе или неверном JSON.
     internal static AnalyticsResult DeserializeResult(string json)
     {
         if (string.IsNullOrWhiteSpace(json))

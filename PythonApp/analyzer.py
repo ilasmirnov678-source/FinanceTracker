@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Точка входа: разбор CLI, чтение SQLite, фильтр по датам.
+# Аналитика по транзакциям из SQLite за период. CLI: --db (путь к БД), --from, --to (даты yyyy-MM-dd). Результат — JSON в stdout (by_category, by_month, total).
 
 import argparse
 import json
@@ -10,6 +10,7 @@ from pathlib import Path
 import pandas as pd
 
 
+# Разбор CLI: --db, --from, --to (даты yyyy-MM-dd). Вызов из C# с теми же именами аргументов.
 def parse_args():
     parser = argparse.ArgumentParser(description="Аналитика по транзакциям из SQLite.")
     parser.add_argument("--db", required=True, help="Путь к файлу finance.db")
@@ -18,6 +19,7 @@ def parse_args():
     return parser.parse_args()
 
 
+# Чтение транзакций за период (Date >= date_from, Date < date_to) из таблицы Transactions.
 def load_transactions(conn: sqlite3.Connection, date_from: str, date_to: str) -> pd.DataFrame:
     # Date в БД — TEXT ISO8601; фильтр включительно от date_from, исключительно до date_to
     query = """
@@ -29,6 +31,7 @@ def load_transactions(conn: sqlite3.Connection, date_from: str, date_to: str) ->
     return pd.read_sql(query, conn, params=(date_from, date_to))
 
 
+# Агрегация: по категориям (name, sum), по месяцам (month yyyy-MM, sum), total. Контракт JSON для C#.
 def aggregate(df: pd.DataFrame) -> dict:
     # По категориям: группа — сумма Amount; знак не меняем (в схеме Amount уже положительный)
     by_cat = df.groupby("Category", as_index=False)["Amount"].sum()
@@ -45,6 +48,7 @@ def aggregate(df: pd.DataFrame) -> dict:
 
 
 def main():
+    # Разбор аргументов, чтение БД, агрегация по категориям и месяцам, вывод JSON в stdout.
     args = parse_args()
     db_path = args.db
     date_from = getattr(args, "date_from")
