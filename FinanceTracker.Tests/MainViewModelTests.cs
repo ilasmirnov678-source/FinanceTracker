@@ -1,4 +1,5 @@
 using FinanceTracker.Models;
+using FinanceTracker.Models.Analytics;
 using FinanceTracker.Services;
 using FinanceTracker.ViewModels;
 using FluentAssertions;
@@ -134,5 +135,34 @@ public class MainViewModelTests
         vm.EndDateFilter = new DateTime(2025, 2, 28);
 
         mockRepo.Verify(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public async Task GenerateReportCommand_PassesReportStartDateAndReportEndDate_ToService()
+    {
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var mockPython = new Mock<IPythonService>();
+        DateTime? capturedFrom = null;
+        DateTime? capturedTo = null;
+        mockPython.Setup(p => p.GenerateReportAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .Callback<string, DateTime, DateTime, CancellationToken>((_, from, to, _) =>
+            {
+                capturedFrom = from;
+                capturedTo = to;
+            })
+            .ReturnsAsync(new AnalyticsResult());
+        string dbPath = "test.db";
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+        vm.ReportStartDate = new DateTime(2025, 1, 10);
+        vm.ReportEndDate = new DateTime(2025, 2, 20);
+
+        vm.GenerateReportCommand.Execute(null);
+        await Task.Delay(500);
+
+        capturedFrom.Should().Be(new DateTime(2025, 1, 10));
+        capturedTo.Should().Be(new DateTime(2025, 2, 20));
+        mockPython.Verify(p => p.GenerateReportAsync(dbPath, vm.ReportStartDate, vm.ReportEndDate, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

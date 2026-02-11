@@ -82,4 +82,108 @@ public class PythonServiceIntegrationTests
             // Файл может быть ещё занят (антивирус, задержка освобождения).
         }
     }
+
+    // Временная директория с PythonApp/analyzer.py (произвольное содержимое) и пустым файлом БД.
+    private static (string tempDir, string dbPath) CreateTempDirWithAnalyzer(string analyzerScriptContent)
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), "FinanceTrackerTest_" + Guid.NewGuid().ToString("N"));
+        string pythonAppDir = Path.Combine(tempDir, "PythonApp");
+        string scriptPath = Path.Combine(pythonAppDir, "analyzer.py");
+        Directory.CreateDirectory(pythonAppDir);
+        File.WriteAllText(scriptPath, analyzerScriptContent);
+        string dbPath = Path.Combine(tempDir, "dummy.db");
+        File.WriteAllBytes(dbPath, Array.Empty<byte>());
+        return (tempDir, dbPath);
+    }
+
+    private static void TryDeleteTempDir(string tempDir)
+    {
+        try
+        {
+            if (Directory.Exists(tempDir))
+                Directory.Delete(tempDir, true);
+        }
+        catch (IOException) { }
+    }
+
+    [Fact]
+    [Trait("Category", "Slow")]
+    public async Task GenerateReportAsync_ThrowsInvalidOperationException_WhenScriptExceedsTimeout()
+    {
+        string script = """
+            import time
+            import sys
+            sys.stderr.write("sleeping...")
+            sys.stderr.flush()
+            time.sleep(25)
+            print('{"by_category":[],"by_month":[],"total":0}')
+            """;
+        var (tempDir, dbPath) = CreateTempDirWithAnalyzer(script);
+        try
+        {
+            var service = new PythonService(tempDir);
+
+            var act = () => service.GenerateReportAsync(dbPath, new DateTime(2025, 1, 1), new DateTime(2025, 2, 1));
+
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*Таймаут выполнения анализатора (15 с)*")
+                .WithMessage("*sleeping...*");
+        }
+        finally
+        {
+            TryDeleteTempDir(tempDir);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Slow")]
+    public async Task GenerateReportAsync_ThrowsOperationCanceledException_WhenUserCancels()
+    {
+        string script = """
+            import time
+            import sys
+            time.sleep(25)
+            print('{"by_category":[],"by_month":[],"total":0}')
+            """;
+        var (tempDir, dbPath) = CreateTempDirWithAnalyzer(script);
+        try
+        {
+            var service = new PythonService(tempDir);
+            using var cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(1));
+
+            var act = () => service.GenerateReportAsync(dbPath, new DateTime(2025, 1, 1), new DateTime(2025, 2, 1), cts.Token);
+
+            await act.Should().ThrowAsync<OperationCanceledException>();
+        }
+        finally
+        {
+            TryDeleteTempDir(tempDir);
+        }
+    }
+
+    [Fact]
+    public async Task GenerateReportAsync_ThrowsInvalidOperationExceptionWithStderr_WhenScriptExitsNonZero()
+    {
+        string script = """
+            import sys
+            sys.stderr.write("custom error")
+            sys.exit(1)
+            """;
+        var (tempDir, dbPath) = CreateTempDirWithAnalyzer(script);
+        try
+        {
+            var service = new PythonService(tempDir);
+
+            var act = () => service.GenerateReportAsync(dbPath, new DateTime(2025, 1, 1), new DateTime(2025, 2, 1));
+
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*кодом 1*")
+                .WithMessage("*custom error*");
+        }
+        finally
+        {
+            TryDeleteTempDir(tempDir);
+        }
+    }
 }
