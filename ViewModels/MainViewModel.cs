@@ -34,6 +34,14 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private DateTime _endDateFilter;
 
+    // Начало периода для отчёта (графики).
+    [ObservableProperty]
+    private DateTime _reportStartDate;
+
+    // Конец периода для отчёта (графики).
+    [ObservableProperty]
+    private DateTime _reportEndDate;
+
     // Серии для круговой диаграммы по категориям.
     public ObservableCollection<ISeries> CategoryChartSeries { get; } = new();
 
@@ -58,6 +66,8 @@ public partial class MainViewModel : ObservableObject
         Transactions = new ObservableCollection<TransactionViewModel>();
         _startDateFilter = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
         _endDateFilter = DateTime.Now.Date;
+        _reportStartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+        _reportEndDate = DateTime.Now.Date;
         RefreshCommand.Execute(null);
     }
 
@@ -120,7 +130,7 @@ public partial class MainViewModel : ObservableObject
         ReportError = string.Empty;
         try
         {
-            var result = await _pythonService.GenerateReportAsync(_dbPath, StartDateFilter, EndDateFilter);
+            var result = await _pythonService.GenerateReportAsync(_dbPath, ReportStartDate, ReportEndDate);
             UpdateChartSeries(result);
         }
         catch (Exception ex)

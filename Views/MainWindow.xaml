@@ -12,6 +12,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <!-- Кнопки управления -->
@@ -24,15 +25,22 @@
         </StackPanel>
         <!-- Ошибка отчёта (строка статуса) -->
         <TextBlock Grid.Row="1" Text="{Binding ReportError}" Foreground="Red" Margin="8,0"/>
-        <!-- Фильтры по датам -->
+        <!-- Фильтры по датам (список транзакций) -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="8">
-            <TextBlock Text="С" VerticalAlignment="Center" Margin="0,0,4,0"/>
+            <TextBlock Text="Список: с" VerticalAlignment="Center" Margin="0,0,4,0"/>
             <DatePicker SelectedDate="{Binding StartDateFilter, Mode=TwoWay}" Margin="0,0,16,0"/>
-            <TextBlock Text="По" VerticalAlignment="Center" Margin="0,0,4,0"/>
+            <TextBlock Text="по" VerticalAlignment="Center" Margin="0,0,4,0"/>
             <DatePicker SelectedDate="{Binding EndDateFilter, Mode=TwoWay}"/>
         </StackPanel>
+        <!-- Период для отчёта (графики) -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="8">
+            <TextBlock Text="Отчёт: с" VerticalAlignment="Center" Margin="0,0,4,0"/>
+            <DatePicker SelectedDate="{Binding ReportStartDate, Mode=TwoWay}" Margin="0,0,16,0"/>
+            <TextBlock Text="по" VerticalAlignment="Center" Margin="0,0,4,0"/>
+            <DatePicker SelectedDate="{Binding ReportEndDate, Mode=TwoWay}"/>
+        </StackPanel>
         <!-- Таблица слева, графики справа -->
-        <Grid Grid.Row="3" Margin="8">
+        <Grid Grid.Row="4" Margin="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="400"/>
