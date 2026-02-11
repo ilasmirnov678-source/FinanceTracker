@@ -7,6 +7,9 @@
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
         Title="Finance Tracker" Height="450" Width="800" WindowState="Maximized">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -22,6 +25,7 @@
             <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
             <Button Content="Обновить" Command="{Binding RefreshCommand}" Margin="0,0,8,0" Padding="12,6"/>
             <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Margin="0,0,8,0" Padding="12,6"/>
+            <ComboBox ItemsSource="{Binding ReportChartTypeItems}" SelectedItem="{Binding SelectedReportChartTypeItem, Mode=TwoWay}" DisplayMemberPath="Display" MinWidth="220" VerticalAlignment="Center" Margin="0,0,0,0"/>
         </StackPanel>
         <!-- Ошибка отчёта (строка статуса) -->
         <TextBlock Grid.Row="1" Text="{Binding ReportError}" Foreground="Red" Margin="8,0"/>
@@ -59,10 +63,16 @@
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                <TextBlock Text="По категориям" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                <lvc:PieChart Series="{Binding CategoryChartSeries}" Height="250" Margin="0,0,0,16"/>
-                <TextBlock Text="По месяцам" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                <lvc:CartesianChart Series="{Binding MonthChartSeries}" XAxes="{Binding MonthChartXAxes}" Height="250"/>
+                <TextBlock Text="{Binding ReportPromptMessage}" Visibility="{Binding IsReportPromptVisible, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding ReportEmptyMessage}" Visibility="{Binding IsReportEmptyMessageVisible, Converter={StaticResource BoolToVis}}" Foreground="Gray" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                <StackPanel Visibility="{Binding IsCategoryChartVisible, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="По категориям" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <lvc:PieChart Series="{Binding CategoryChartSeries}" Height="250" Margin="0,0,0,16"/>
+                </StackPanel>
+                <StackPanel Visibility="{Binding IsMonthChartVisible, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="По месяцам" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <lvc:CartesianChart Series="{Binding MonthChartSeries}" XAxes="{Binding MonthChartXAxes}" Height="250"/>
+                </StackPanel>
             </StackPanel>
         </Grid>
     </Grid>

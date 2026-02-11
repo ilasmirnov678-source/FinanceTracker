@@ -184,4 +184,95 @@ public class MainViewModelTests
         vm.ReportError.Should().Be(errorMessage);
         vm.IsReportGenerating.Should().BeFalse();
     }
+
+    [Fact]
+    public void ReportChartType_ByCategory_ShowsOnlyCategoryChart()
+    {
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+        vm.SelectedReportChartTypeItem = vm.ReportChartTypeItems.First(x => x.Value == ReportChartType.ByCategory);
+
+        vm.IsCategoryChartVisible.Should().BeTrue();
+        vm.IsMonthChartVisible.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ReportChartType_ByMonth_ShowsOnlyMonthChart()
+    {
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+        vm.SelectedReportChartTypeItem = vm.ReportChartTypeItems.First(x => x.Value == ReportChartType.ByMonth);
+
+        vm.IsCategoryChartVisible.Should().BeFalse();
+        vm.IsMonthChartVisible.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ReportChartType_Both_ShowsBothCharts()
+    {
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+        vm.SelectedReportChartTypeItem = vm.ReportChartTypeItems.First(x => x.Value == ReportChartType.Both);
+
+        vm.IsCategoryChartVisible.Should().BeTrue();
+        vm.IsMonthChartVisible.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GenerateReportCommand_WhenResultEmpty_SetsReportEmptyMessage()
+    {
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var mockPython = new Mock<IPythonService>();
+        mockPython.Setup(p => p.GenerateReportAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AnalyticsResult { ByCategory = [], ByMonth = [], Total = 0 });
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, "test.db");
+
+        vm.GenerateReportCommand.Execute(null);
+        await Task.Delay(500);
+
+        vm.ReportEmptyMessage.Should().Be("Нет данных за выбранный период");
+        vm.IsReportEmptyMessageVisible.Should().BeTrue();
+    }
+
+    [Fact]
+    public void BeforeFirstReport_ShowsPromptMessage()
+    {
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+
+        vm.HasReportBeenRequested.Should().BeFalse();
+        vm.ReportPromptMessage.Should().Contain("Создать отчёт");
+        vm.IsReportPromptVisible.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task AfterFirstReport_HidesPromptMessage()
+    {
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+
+        vm.GenerateReportCommand.Execute(null);
+        await Task.Delay(500);
+
+        vm.HasReportBeenRequested.Should().BeTrue();
+        vm.ReportPromptMessage.Should().BeEmpty();
+        vm.IsReportPromptVisible.Should().BeFalse();
+    }
 }
