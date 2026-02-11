@@ -28,6 +28,21 @@ def load_transactions(conn: sqlite3.Connection, date_from: str, date_to: str) ->
     return pd.read_sql(query, conn, params=(date_from, date_to))
 
 
+def aggregate(df: pd.DataFrame) -> dict:
+    # По категориям: группа — сумма Amount; знак не меняем (в схеме Amount уже положительный)
+    by_cat = df.groupby("Category", as_index=False)["Amount"].sum()
+    by_category = [{"name": row["Category"], "sum": float(row["Amount"])} for _, row in by_cat.iterrows()]
+
+    # По месяцам: из Date (TEXT yyyy-MM-dd) берём yyyy-MM, группируем, сумма, сортировка по месяцу
+    df = df.copy()
+    df["month"] = df["Date"].str[:7]
+    by_mon = df.groupby("month", as_index=False)["Amount"].sum().sort_values("month")
+    by_month = [{"month": row["month"], "sum": float(row["Amount"])} for _, row in by_mon.iterrows()]
+
+    total = float(df["Amount"].sum()) if len(df) else 0.0
+    return {"by_category": by_category, "by_month": by_month, "total": total}
+
+
 def main():
     args = parse_args()
     db_path = args.db
@@ -45,7 +60,8 @@ def main():
         print(f"Ошибка чтения БД: {e}", file=sys.stderr)
         sys.exit(2)
 
-    # Этап 1: только загрузка; вывод JSON — далее
+    analytics = aggregate(df)
+    # Вывод JSON — этап 3
     sys.exit(0)
 
 
