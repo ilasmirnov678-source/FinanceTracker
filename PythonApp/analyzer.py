@@ -2,6 +2,7 @@
 # Точка входа: разбор CLI, чтение SQLite, фильтр по датам.
 
 import argparse
+import json
 import sqlite3
 import sys
 from pathlib import Path
@@ -61,7 +62,7 @@ def main():
         sys.exit(2)
 
     analytics = aggregate(df)
-    # Вывод JSON — этап 3
+    print(json.dumps(analytics, ensure_ascii=False))
     sys.exit(0)
 
 
