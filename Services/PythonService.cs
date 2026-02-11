@@ -14,6 +14,8 @@ public class PythonService : IPythonService
         PropertyNameCaseInsensitive = true
     };
 
+    private static readonly TimeSpan ReportTimeout = TimeSpan.FromSeconds(15);
+
     private readonly string _baseDirectory;
     private readonly string _scriptPath;
 
@@ -55,21 +57,30 @@ public class PythonService : IPythonService
 
         process.Start();
 
-        using var registration = cancellationToken.Register(() =>
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(ReportTimeout);
+
+        using var registration = cts.Token.Register(() =>
         {
             try { process.Kill(); } catch { /* игнор при уже завершённом процессе */ }
         });
 
+        // Чтение потоков отменяем только по запросу пользователя, чтобы при таймауте успеть прочитать stderr.
         var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
         var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
 
         try
         {
-            await process.WaitForExitAsync(cancellationToken);
+            await process.WaitForExitAsync(cts.Token);
         }
         catch (OperationCanceledException)
         {
-            throw;
+            string errOut = await stdoutTask;
+            string errErr = await stderrTask;
+            if (cancellationToken.IsCancellationRequested)
+                throw;
+            throw new InvalidOperationException(
+                $"Таймаут выполнения анализатора ({(int)ReportTimeout.TotalSeconds} с).{(string.IsNullOrEmpty(errErr) ? "" : " " + errErr.Trim())}");
         }
 
         string stdout = await stdoutTask;
