@@ -9,6 +9,14 @@ namespace FinanceTracker.Tests;
 
 public class MainViewModelTests
 {
+    private static (Mock<IPythonService> python, string dbPath) CreatePythonServiceAndPath()
+    {
+        var mock = new Mock<IPythonService>();
+        mock.Setup(p => p.GenerateReportAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Models.Analytics.AnalyticsResult());
+        return (mock, "test.db");
+    }
+
     [Fact]
     public void Refresh_LoadsTransactionsFromRepository()
     {
@@ -20,8 +28,9 @@ public class MainViewModelTests
         };
         mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .Returns(transactions);
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
 
-        var vm = new MainViewModel(mockRepo.Object);
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
 
         vm.Transactions.Should().HaveCount(2);
         vm.Transactions[0].Id.Should().Be(1);
@@ -45,8 +54,9 @@ public class MainViewModelTests
         var callCount = 0;
         mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .Returns(() => ++callCount == 1 ? firstCall : secondCall);
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
 
-        var vm = new MainViewModel(mockRepo.Object);
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
         vm.Transactions.Should().HaveCount(1);
         vm.Transactions[0].Id.Should().Be(1);
 
@@ -62,8 +72,9 @@ public class MainViewModelTests
         var mockRepo = new Mock<ITransactionRepository>();
         mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .Returns(new List<Transaction>());
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
 
-        var vm = new MainViewModel(mockRepo.Object);
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
         vm.SelectedTransaction = null;
 
         vm.EditTransactionCommand.CanExecute(null).Should().BeFalse();
@@ -84,8 +95,9 @@ public class MainViewModelTests
         };
         mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .Returns(new List<Transaction> { transaction });
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
 
-        var vm = new MainViewModel(mockRepo.Object);
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
         vm.SelectedTransaction = vm.Transactions[0];
 
         vm.EditTransactionCommand.CanExecute(null).Should().BeTrue();
@@ -98,8 +110,9 @@ public class MainViewModelTests
         var mockRepo = new Mock<ITransactionRepository>();
         mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .Returns(new List<Transaction>());
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
 
-        var vm = new MainViewModel(mockRepo.Object);
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
         mockRepo.Invocations.Clear();
 
         vm.StartDateFilter = new DateTime(2025, 1, 1);
@@ -113,8 +126,9 @@ public class MainViewModelTests
         var mockRepo = new Mock<ITransactionRepository>();
         mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .Returns(new List<Transaction>());
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
 
-        var vm = new MainViewModel(mockRepo.Object);
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
         mockRepo.Invocations.Clear();
 
         vm.EndDateFilter = new DateTime(2025, 2, 28);

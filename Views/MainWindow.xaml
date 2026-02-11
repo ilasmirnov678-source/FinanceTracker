@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <!-- Кнопки управления -->
@@ -18,17 +19,19 @@
             <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
             <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
             <Button Content="Обновить" Command="{Binding RefreshCommand}" Margin="0,0,8,0" Padding="12,6"/>
-            <Button Content="Создать отчёт" Margin="0,0,8,0" Padding="12,6"/>
+            <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Margin="0,0,8,0" Padding="12,6"/>
         </StackPanel>
+        <!-- Ошибка отчёта (строка статуса) -->
+        <TextBlock Grid.Row="1" Text="{Binding ReportError}" Foreground="Red" Margin="8,0"/>
         <!-- Фильтры по датам -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="8">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="8">
             <TextBlock Text="С" VerticalAlignment="Center" Margin="0,0,4,0"/>
             <DatePicker SelectedDate="{Binding StartDateFilter, Mode=TwoWay}" Margin="0,0,16,0"/>
             <TextBlock Text="По" VerticalAlignment="Center" Margin="0,0,4,0"/>
             <DatePicker SelectedDate="{Binding EndDateFilter, Mode=TwoWay}"/>
         </StackPanel>
         <!-- Список транзакций -->
-        <DataGrid Grid.Row="2"
+        <DataGrid Grid.Row="3"
                   ItemsSource="{Binding Transactions}"
                   SelectedItem="{Binding SelectedTransaction, Mode=TwoWay}"
                   AutoGenerateColumns="False"

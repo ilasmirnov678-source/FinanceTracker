@@ -7,7 +7,7 @@ using FinanceTracker.Models.Analytics;
 namespace FinanceTracker.Services;
 
 // Запуск Python-анализатора, чтение stdout и парсинг JSON в AnalyticsResult.
-public class PythonService
+public class PythonService : IPythonService
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {

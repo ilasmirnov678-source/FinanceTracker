@@ -20,7 +20,8 @@ namespace FinanceTracker.Views
             InitializeComponent();
             var dbService = new DatabaseService();
             var repository = new TransactionRepository(dbService.ConnectionString);
-            DataContext = new MainViewModel(repository);
+            var pythonService = new PythonService();
+            DataContext = new MainViewModel(repository, pythonService, dbService.DbPath);
         }
     }
 }
