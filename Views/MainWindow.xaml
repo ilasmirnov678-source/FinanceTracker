@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FinanceTracker.Views"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
         Title="Finance Tracker" Height="450" Width="800" WindowState="Maximized">
     <Grid>
@@ -30,19 +31,31 @@
             <TextBlock Text="По" VerticalAlignment="Center" Margin="0,0,4,0"/>
             <DatePicker SelectedDate="{Binding EndDateFilter, Mode=TwoWay}"/>
         </StackPanel>
-        <!-- Список транзакций -->
-        <DataGrid Grid.Row="3"
-                  ItemsSource="{Binding Transactions}"
-                  SelectedItem="{Binding SelectedTransaction, Mode=TwoWay}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  Margin="8">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Дата" Binding="{Binding Date, StringFormat=dd.MM.yyyy}" Width="100"/>
-                <DataGridTextColumn Header="Сумма" Binding="{Binding DisplayAmount}" Width="100"/>
-                <DataGridTextColumn Header="Категория" Binding="{Binding Category}" Width="*"/>
-                <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- Таблица слева, графики справа -->
+        <Grid Grid.Row="3" Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="400"/>
+            </Grid.ColumnDefinitions>
+            <DataGrid Grid.Column="0"
+                      ItemsSource="{Binding Transactions}"
+                      SelectedItem="{Binding SelectedTransaction, Mode=TwoWay}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      Margin="0,0,8,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Дата" Binding="{Binding Date, StringFormat=dd.MM.yyyy}" Width="100"/>
+                    <DataGridTextColumn Header="Сумма" Binding="{Binding DisplayAmount}" Width="100"/>
+                    <DataGridTextColumn Header="Категория" Binding="{Binding Category}" Width="*"/>
+                    <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                <TextBlock Text="По категориям" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <lvc:PieChart Series="{Binding CategoryChartSeries}" Height="250" Margin="0,0,0,16"/>
+                <TextBlock Text="По месяцам" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <lvc:CartesianChart Series="{Binding MonthChartSeries}" XAxes="{Binding MonthChartXAxes}" Height="250"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
