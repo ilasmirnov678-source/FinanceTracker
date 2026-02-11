@@ -5,6 +5,7 @@
 [Oo]bj/
 *.user
 *.suo
+.cursor/
 .vs/
 
 # База данных и отчёты
