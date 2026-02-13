@@ -55,6 +55,7 @@
                                Margin="0,24,0,24"/>
                     <DataGrid ItemsSource="{Binding Transactions}"
                               SelectedItem="{Binding SelectedTransaction, Mode=TwoWay}"
+                              Style="{StaticResource TransactionsDataGrid}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               MinHeight="200"
@@ -88,11 +89,11 @@
                     <TextBlock Text="{Binding ReportPromptMessage}" Visibility="{Binding IsReportPromptVisible, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8" TextWrapping="Wrap"/>
                     <TextBlock Text="{Binding ReportEmptyMessage}" Visibility="{Binding IsReportEmptyMessageVisible, Converter={StaticResource BoolToVis}}" Foreground="Gray" Margin="0,0,0,8" TextWrapping="Wrap"/>
                     <StackPanel Visibility="{Binding IsCategoryChartVisible, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="По категориям" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="По категориям" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8"/>
                         <lvc:PieChart Series="{Binding CategoryChartSeries}" Height="250" Margin="0,0,0,16"/>
                     </StackPanel>
                     <StackPanel Visibility="{Binding IsMonthChartVisible, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="По месяцам" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="По месяцам" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8"/>
                         <lvc:CartesianChart Series="{Binding MonthChartSeries}" XAxes="{Binding MonthChartXAxes}" Height="250"/>
                     </StackPanel>
                 </StackPanel>
