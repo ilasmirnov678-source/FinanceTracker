@@ -4,6 +4,76 @@
              xmlns:local="clr-namespace:FinanceTracker"
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- Цвета (AARRGGBB) -->
+        <Color x:Key="AccentGreenColor">#FF059669</Color>
+        <Color x:Key="SecondaryBgColor">#FFE5E7EB</Color>
+        <Color x:Key="SecondaryTextColor">#FF374151</Color>
+        <Color x:Key="PanelBorderColor">#FFE5E7EB</Color>
+        <Color x:Key="WindowBackgroundColor">#FFF3F4F6</Color>
+
+        <!-- Кисти для привязки -->
+        <SolidColorBrush x:Key="AccentGreen" Color="{StaticResource AccentGreenColor}"/>
+        <SolidColorBrush x:Key="SecondaryBg" Color="{StaticResource SecondaryBgColor}"/>
+        <SolidColorBrush x:Key="SecondaryText" Color="{StaticResource SecondaryTextColor}"/>
+        <SolidColorBrush x:Key="PanelBorder" Color="{StaticResource PanelBorderColor}"/>
+        <SolidColorBrush x:Key="WindowBackground" Color="{StaticResource WindowBackgroundColor}"/>
+
+        <!-- Стиль основной кнопки (Добавить, Создать отчёт) -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentGreen}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль вторичной кнопки (Редактировать, Удалить, Обновить, Отмена) -->
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SecondaryBg}"/>
+            <Setter Property="Foreground" Value="{StaticResource SecondaryText}"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль карточки (Border): белый фон, скругление 8, рамка PanelBorder -->
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="BorderBrush" Value="{StaticResource PanelBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="2" Opacity="0.15" Color="Black"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>

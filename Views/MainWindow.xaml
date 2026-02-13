@@ -20,11 +20,11 @@
         </Grid.RowDefinitions>
         <!-- Кнопки управления -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="8">
-            <Button Content="Добавить" Command="{Binding AddTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
-            <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
-            <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
-            <Button Content="Обновить" Command="{Binding RefreshCommand}" Margin="0,0,8,0" Padding="12,6"/>
-            <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Margin="0,0,8,0" Padding="12,6"/>
+            <Button Content="Добавить" Command="{Binding AddTransactionCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+            <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0"/>
+            <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0"/>
+            <Button Content="Обновить" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0"/>
+            <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
             <ComboBox ItemsSource="{Binding ReportChartTypeItems}" SelectedItem="{Binding SelectedReportChartTypeItem, Mode=TwoWay}" DisplayMemberPath="Display" MinWidth="220" VerticalAlignment="Center" Margin="0,0,0,0"/>
         </StackPanel>
         <!-- Ошибка отчёта (строка статуса) -->
