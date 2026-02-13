@@ -9,6 +9,13 @@
         Title="Finance Tracker" Height="450" Width="800" WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Style x:Key="PrimaryButtonDimmedWhenGenerating" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsReportGenerating}" Value="True">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid Background="{StaticResource WindowBackground}">
         <Grid.RowDefinitions>
@@ -72,10 +79,11 @@
                         <TextBlock Text="–" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <DatePicker SelectedDate="{Binding ReportEndDate, Mode=TwoWay}"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                         <ComboBox ItemsSource="{Binding ReportChartTypeItems}" SelectedItem="{Binding SelectedReportChartTypeItem, Mode=TwoWay}" DisplayMemberPath="Display" MinWidth="220" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="Тип отображаемых графиков: по категориям, по месяцам или оба"/>
-                        <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Style="{StaticResource PrimaryButton}" ToolTip="Запуск аналитики по выбранному периоду"/>
+                        <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Style="{StaticResource PrimaryButtonDimmedWhenGenerating}" ToolTip="Запуск аналитики по выбранному периоду"/>
                     </StackPanel>
+                    <ProgressBar Style="{StaticResource ReportProgressBar}" Margin="0,0,0,12" Visibility="{Binding IsReportGenerating, Converter={StaticResource BoolToVis}}"/>
                     <TextBlock Text="{Binding ReportError}" Foreground="Red" Margin="0,0,0,8" TextWrapping="Wrap"/>
                     <TextBlock Text="{Binding ReportPromptMessage}" Visibility="{Binding IsReportPromptVisible, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8" TextWrapping="Wrap"/>
                     <TextBlock Text="{Binding ReportEmptyMessage}" Visibility="{Binding IsReportEmptyMessageVisible, Converter={StaticResource BoolToVis}}" Foreground="Gray" Margin="0,0,0,8" TextWrapping="Wrap"/>

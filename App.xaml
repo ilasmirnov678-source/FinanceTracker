@@ -62,6 +62,14 @@
             </Setter>
         </Style>
 
+        <!-- Стиль полоски загрузки (индикатор расчёта отчёта) -->
+        <Style x:Key="ReportProgressBar" TargetType="ProgressBar">
+            <Setter Property="Height" Value="6"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentGreen}"/>
+            <Setter Property="Background" Value="{StaticResource SecondaryBg}"/>
+            <Setter Property="IsIndeterminate" Value="True"/>
+        </Style>
+
         <!-- Стиль карточки (Border): белый фон, скругление 8, рамка PanelBorder -->
         <Style x:Key="CardBorder" TargetType="Border">
             <Setter Property="Background" Value="White"/>
