@@ -202,8 +202,8 @@ public partial class MainViewModel : ObservableObject
 
     private bool CanEditOrDelete() => SelectedTransaction != null;
 
-    // Расширить период отображения, если дата транзакции вне текущего диапазона.
-    private void ExpandDateFilterIfNeeded(DateTime transactionDate)
+    // Расширить период отображения, если дата транзакции вне текущего диапазона. Internal для тестов.
+    internal void ExpandDateFilterIfNeeded(DateTime transactionDate)
     {
         var date = transactionDate.Date;
         if (date < StartDateFilter)
