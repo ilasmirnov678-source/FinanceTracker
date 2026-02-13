@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FinanceTracker.Models;
 using FinanceTracker.Models.Analytics;
 using FinanceTracker.Services;
 using FinanceTracker.Views;
@@ -150,7 +151,11 @@ public partial class MainViewModel : ObservableObject
             Owner = Application.Current.MainWindow
         };
         if (window.ShowDialog() == true)
+        {
+            if (window.SavedTransaction is { } t)
+                ExpandDateFilterIfNeeded(t.Date);
             RefreshCommand.Execute(null);
+        }
     }
 
     // Редактировать выбранную транзакцию.
@@ -163,7 +168,11 @@ public partial class MainViewModel : ObservableObject
             Owner = Application.Current.MainWindow
         };
         if (window.ShowDialog() == true)
+        {
+            if (window.SavedTransaction is { } t)
+                ExpandDateFilterIfNeeded(t.Date);
             RefreshCommand.Execute(null);
+        }
     }
 
     // Удалить выбранную транзакцию.
@@ -192,6 +201,16 @@ public partial class MainViewModel : ObservableObject
     }
 
     private bool CanEditOrDelete() => SelectedTransaction != null;
+
+    // Расширить период отображения, если дата транзакции вне текущего диапазона.
+    private void ExpandDateFilterIfNeeded(DateTime transactionDate)
+    {
+        var date = transactionDate.Date;
+        if (date < StartDateFilter)
+            StartDateFilter = date;
+        if (date > EndDateFilter)
+            EndDateFilter = date;
+    }
 
     [RelayCommand(CanExecute = nameof(CanGenerateReport))]
     private async Task GenerateReportAsync()
