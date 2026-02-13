@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FinanceTracker.Views"
+        xmlns:controls="clr-namespace:FinanceTracker.Controls"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
         Title="Finance Tracker" Height="450" Width="800" WindowState="Maximized">
@@ -41,16 +42,16 @@
             <!-- Левая колонка: Транзакции -->
             <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,16,0">
                 <StackPanel>
-                    <TextBlock Text="Транзакции" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,12"/>
+                    <TextBlock Text="Транзакции" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource CardText}" Margin="0,0,0,12"/>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <TextBlock Text="Период:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <DatePicker SelectedDate="{Binding StartDateFilter, Mode=TwoWay}" Margin="0,0,8,0"/>
-                        <TextBlock Text="–" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <DatePicker SelectedDate="{Binding EndDateFilter, Mode=TwoWay}"/>
+                        <TextBlock Text="Период:" VerticalAlignment="Center" Foreground="{StaticResource CardText}" Margin="0,0,8,0"/>
+                        <controls:DarkDatePicker SelectedDate="{Binding StartDateFilter, Mode=TwoWay}" Style="{StaticResource DarkDatePicker}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text=" — " VerticalAlignment="Center" Foreground="{StaticResource CardText}" Margin="0,0,8,0"/>
+                        <controls:DarkDatePicker SelectedDate="{Binding EndDateFilter, Mode=TwoWay}" Style="{StaticResource DarkDatePicker}" VerticalAlignment="Center"/>
                     </StackPanel>
                     <TextBlock Text="Нет операций за период. Добавьте первую транзакцию."
                                Visibility="{Binding IsTransactionsEmpty, Converter={StaticResource BoolToVis}}"
-                               Foreground="{StaticResource SecondaryText}"
+                               Foreground="{StaticResource CardTextMuted}"
                                TextAlignment="Center"
                                Margin="0,24,0,24"/>
                     <DataGrid ItemsSource="{Binding Transactions}"
@@ -73,27 +74,29 @@
             <!-- Правая колонка: Аналитика -->
             <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="16,0,0,0">
                 <StackPanel>
-                    <TextBlock Text="Аналитика" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,12"/>
+                    <TextBlock Text="Аналитика" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource CardText}" Margin="0,0,0,12"/>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="Период:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <DatePicker SelectedDate="{Binding ReportStartDate, Mode=TwoWay}" Margin="0,0,8,0"/>
-                        <TextBlock Text="–" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <DatePicker SelectedDate="{Binding ReportEndDate, Mode=TwoWay}"/>
+                        <TextBlock Text="Период:" VerticalAlignment="Center" Foreground="{StaticResource CardText}" Margin="0,0,8,0"/>
+                        <controls:DarkDatePicker SelectedDate="{Binding ReportStartDate, Mode=TwoWay}" Style="{StaticResource DarkDatePicker}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text=" — " VerticalAlignment="Center" Foreground="{StaticResource CardText}" Margin="0,0,8,0"/>
+                        <controls:DarkDatePicker SelectedDate="{Binding ReportEndDate, Mode=TwoWay}" Style="{StaticResource DarkDatePicker}" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <ComboBox ItemsSource="{Binding ReportChartTypeItems}" SelectedItem="{Binding SelectedReportChartTypeItem, Mode=TwoWay}" DisplayMemberPath="Display" MinWidth="220" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="Тип отображаемых графиков: по категориям, по месяцам или оба"/>
-                        <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Style="{StaticResource PrimaryButtonDimmedWhenGenerating}" ToolTip="Запуск аналитики по выбранному периоду"/>
+                    <StackPanel Margin="0,0,0,8">
+                        <RadioButton Content="По категориям (круговая)" IsChecked="{Binding IsChartTypeByCategory, Mode=TwoWay}" Style="{StaticResource DarkRadioButton}" Margin="0,0,0,4" ToolTip="Круговая диаграмма по категориям"/>
+                        <RadioButton Content="По месяцам (столбцы)" IsChecked="{Binding IsChartTypeByMonth, Mode=TwoWay}" Style="{StaticResource DarkRadioButton}" Margin="0,0,0,4" ToolTip="Столбчатая диаграмма по месяцам"/>
+                        <RadioButton Content="Оба" IsChecked="{Binding IsChartTypeBoth, Mode=TwoWay}" Style="{StaticResource DarkRadioButton}" Margin="0,0,0,8" ToolTip="Оба графика"/>
+                        <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Style="{StaticResource PrimaryButtonDimmedWhenGenerating}" ToolTip="Запуск аналитики по выбранному периоду" HorizontalAlignment="Left"/>
                     </StackPanel>
                     <ProgressBar Style="{StaticResource ReportProgressBar}" Margin="0,0,0,12" Visibility="{Binding IsReportGenerating, Converter={StaticResource BoolToVis}}"/>
                     <TextBlock Text="{Binding ReportError}" Foreground="Red" Margin="0,0,0,8" TextWrapping="Wrap"/>
-                    <TextBlock Text="{Binding ReportPromptMessage}" Visibility="{Binding IsReportPromptVisible, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8" TextWrapping="Wrap"/>
-                    <TextBlock Text="{Binding ReportEmptyMessage}" Visibility="{Binding IsReportEmptyMessageVisible, Converter={StaticResource BoolToVis}}" Foreground="Gray" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding ReportPromptMessage}" Visibility="{Binding IsReportPromptVisible, Converter={StaticResource BoolToVis}}" Foreground="{StaticResource CardTextMuted}" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding ReportEmptyMessage}" Visibility="{Binding IsReportEmptyMessageVisible, Converter={StaticResource BoolToVis}}" Foreground="{StaticResource CardTextMuted}" Margin="0,0,0,8" TextWrapping="Wrap"/>
                     <StackPanel Visibility="{Binding IsCategoryChartVisible, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="По категориям" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8"/>
+                        <TextBlock Text="По категориям" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource CardText}" Margin="0,0,0,8"/>
                         <lvc:PieChart Series="{Binding CategoryChartSeries}" Height="250" Margin="0,0,0,16"/>
                     </StackPanel>
                     <StackPanel Visibility="{Binding IsMonthChartVisible, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="По месяцам" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8"/>
+                        <TextBlock Text="По месяцам" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource CardText}" Margin="0,0,0,8"/>
                         <lvc:CartesianChart Series="{Binding MonthChartSeries}" XAxes="{Binding MonthChartXAxes}" Height="250"/>
                     </StackPanel>
                 </StackPanel>
