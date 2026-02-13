@@ -1,4 +1,5 @@
 using System.IO;
+using FinanceTracker;
 using FinanceTracker.Models.Analytics;
 using FinanceTracker.Services;
 using FinanceTracker.Tests.Helpers;
@@ -87,8 +88,8 @@ public class PythonServiceIntegrationTests
     private static (string tempDir, string dbPath) CreateTempDirWithAnalyzer(string analyzerScriptContent)
     {
         string tempDir = Path.Combine(Path.GetTempPath(), "FinanceTrackerTest_" + Guid.NewGuid().ToString("N"));
-        string pythonAppDir = Path.Combine(tempDir, "PythonApp");
-        string scriptPath = Path.Combine(pythonAppDir, "analyzer.py");
+        string pythonAppDir = Path.Combine(tempDir, AppConstants.PythonAppFolder);
+        string scriptPath = Path.Combine(pythonAppDir, AppConstants.AnalyzerScriptName);
         Directory.CreateDirectory(pythonAppDir);
         File.WriteAllText(scriptPath, analyzerScriptContent);
         string dbPath = Path.Combine(tempDir, "dummy.db");

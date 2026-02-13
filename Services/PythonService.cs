@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using FinanceTracker;
 using FinanceTracker.Models.Analytics;
 
 namespace FinanceTracker.Services;
@@ -14,25 +15,23 @@ public class PythonService : IPythonService
         PropertyNameCaseInsensitive = true
     };
 
-    private static readonly TimeSpan ReportTimeout = TimeSpan.FromSeconds(15);
-
     private readonly string _baseDirectory;
     private readonly string _scriptPath;
 
     public PythonService()
     {
         _baseDirectory = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        _scriptPath = Path.Combine(_baseDirectory, "PythonApp", "analyzer.py");
+        _scriptPath = Path.Combine(_baseDirectory, AppConstants.PythonAppFolder, AppConstants.AnalyzerScriptName);
     }
 
     // Для тестов: задаёт базовую директорию (например, без PythonApp для проверки FileNotFoundException).
     internal PythonService(string baseDirectory)
     {
         _baseDirectory = baseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        _scriptPath = Path.Combine(_baseDirectory, "PythonApp", "analyzer.py");
+        _scriptPath = Path.Combine(_baseDirectory, AppConstants.PythonAppFolder, AppConstants.AnalyzerScriptName);
     }
 
-    // Запускает analyzer.py с заданным путём к БД и периодом дат, возвращает результат аналитики.
+    // Запускает analyzer.py (путь к БД, период from–to), таймаут по константе; читает stdout/stderr, парсит JSON в AnalyticsResult. Выбрасывает FileNotFoundException, InvalidOperationException (таймаут, ненулевой exit code, ошибка парсинга), OperationCanceledException при отмене токена.
     public async Task<AnalyticsResult> GenerateReportAsync(string dbPath, DateTime from, DateTime to, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(_scriptPath))
@@ -54,11 +53,12 @@ public class PythonService : IPythonService
             StandardErrorEncoding = Encoding.UTF8,
             CreateNoWindow = true
         };
+        process.StartInfo.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
 
         process.Start();
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(ReportTimeout);
+        cts.CancelAfter(TimeSpan.FromSeconds(AppConstants.ReportTimeoutSeconds));
 
         using var registration = cts.Token.Register(() =>
         {
@@ -80,7 +80,7 @@ public class PythonService : IPythonService
             if (cancellationToken.IsCancellationRequested)
                 throw;
             throw new InvalidOperationException(
-                $"Таймаут выполнения анализатора ({(int)ReportTimeout.TotalSeconds} с).{(string.IsNullOrEmpty(errErr) ? "" : " " + errErr.Trim())}");
+                $"Таймаут выполнения анализатора ({AppConstants.ReportTimeoutSeconds} с).{(string.IsNullOrEmpty(errErr) ? "" : " " + errErr.Trim())}");
         }
 
         string stdout = await stdoutTask;
@@ -92,24 +92,27 @@ public class PythonService : IPythonService
         return DeserializeResult(stdout);
     }
 
+    // Сначала venv в PythonApp (Scripts/python.exe), иначе исполняемый "python" из PATH.
     internal static string ResolvePythonPath(string baseDir)
     {
-        string venvPython = Path.Combine(baseDir, "PythonApp", "venv", "Scripts", "python.exe");
+        string venvPython = Path.Combine(baseDir, AppConstants.PythonAppFolder, AppConstants.VenvFolder, AppConstants.VenvScriptsFolder, AppConstants.PythonExeName);
         if (File.Exists(venvPython))
             return venvPython;
-        return "python";
+        return AppConstants.PythonFallback;
     }
 
     // Внешний вызов без инжекта baseDir использует поле _baseDirectory.
     private string ResolvePythonPath() => ResolvePythonPath(_baseDirectory);
 
+    // Строка аргументов для analyzer.py: путь к скрипту, --db, --from (yyyy-MM-dd), --to (yyyy-MM-dd).
     internal string BuildArguments(string dbPath, DateTime from, DateTime to)
     {
         string fromStr = from.ToString("yyyy-MM-dd");
         string toStr = to.ToString("yyyy-MM-dd");
-        return $"\"{_scriptPath}\" --db \"{dbPath}\" --from {fromStr} --to {toStr}";
+        return $"\"{_scriptPath}\" {AppConstants.CliArgDb} \"{dbPath}\" {AppConstants.CliArgFrom} {fromStr} {AppConstants.CliArgTo} {toStr}";
     }
 
+    // Парсит JSON в AnalyticsResult (контракт: by_category, by_month, total). InvalidOperationException при пустом выводе или неверном JSON.
     internal static AnalyticsResult DeserializeResult(string json)
     {
         if (string.IsNullOrWhiteSpace(json))

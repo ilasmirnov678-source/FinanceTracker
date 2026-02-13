@@ -73,6 +73,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCategoryChartVisible))]
     [NotifyPropertyChangedFor(nameof(IsMonthChartVisible))]
+    [NotifyPropertyChangedFor(nameof(IsChartTypeByCategory))]
+    [NotifyPropertyChangedFor(nameof(IsChartTypeByMonth))]
+    [NotifyPropertyChangedFor(nameof(IsChartTypeBoth))]
     private ReportChartTypeItem? _selectedReportChartTypeItem;
 
     [ObservableProperty]
@@ -96,12 +99,40 @@ public partial class MainViewModel : ObservableObject
     public bool IsMonthChartVisible =>
         SelectedReportChartTypeItem?.Value == ReportChartType.ByMonth || SelectedReportChartTypeItem?.Value == ReportChartType.Both;
 
+    public bool IsChartTypeByCategory
+    {
+        get => SelectedReportChartTypeItem?.Value == ReportChartType.ByCategory;
+        set { if (value) SelectedReportChartTypeItem = ReportChartTypeItems.First(x => x.Value == ReportChartType.ByCategory); }
+    }
+
+    public bool IsChartTypeByMonth
+    {
+        get => SelectedReportChartTypeItem?.Value == ReportChartType.ByMonth;
+        set { if (value) SelectedReportChartTypeItem = ReportChartTypeItems.First(x => x.Value == ReportChartType.ByMonth); }
+    }
+
+    public bool IsChartTypeBoth
+    {
+        get => SelectedReportChartTypeItem?.Value == ReportChartType.Both;
+        set { if (value) SelectedReportChartTypeItem = ReportChartTypeItems.First(x => x.Value == ReportChartType.Both); }
+    }
+
+    // Пустой список транзакций за выбранный период (для заглушки в левой панели).
+    public bool IsTransactionsEmpty => Transactions.Count == 0;
+
+    public bool HasTransactions => !IsTransactionsEmpty;
+
     public MainViewModel(ITransactionRepository repository, IPythonService pythonService, string dbPath)
     {
         _repository = repository;
         _pythonService = pythonService;
         _dbPath = dbPath;
         Transactions = new ObservableCollection<TransactionViewModel>();
+        Transactions.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(IsTransactionsEmpty));
+            OnPropertyChanged(nameof(HasTransactions));
+        };
         _startDateFilter = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
         _endDateFilter = DateTime.Now.Date;
         _reportStartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);

@@ -4,76 +4,156 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FinanceTracker.Views"
+        xmlns:controls="clr-namespace:FinanceTracker.Controls"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
-        Title="Finance Tracker" Height="450" Width="800" WindowState="Maximized">
+        Title="Finance Tracker" Height="450" Width="800" WindowState="Maximized"
+        WindowStyle="None" ResizeMode="CanResize">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Style x:Key="PrimaryButtonDimmedWhenGenerating" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsReportGenerating}" Value="True">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="TitleBarButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource CardText}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#FF404040"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="TitleBarCloseButton" TargetType="Button" BasedOn="{StaticResource TitleBarButton}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFE81123"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
-    <Grid>
+    <Grid Background="{StaticResource WindowBackground}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <!-- Кнопки управления -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="8">
-            <Button Content="Добавить" Command="{Binding AddTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
-            <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
-            <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Margin="0,0,8,0" Padding="12,6"/>
-            <Button Content="Обновить" Command="{Binding RefreshCommand}" Margin="0,0,8,0" Padding="12,6"/>
-            <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Margin="0,0,8,0" Padding="12,6"/>
-            <ComboBox ItemsSource="{Binding ReportChartTypeItems}" SelectedItem="{Binding SelectedReportChartTypeItem, Mode=TwoWay}" DisplayMemberPath="Display" MinWidth="220" VerticalAlignment="Center" Margin="0,0,0,0"/>
+
+        <!-- Своя шапка: перетаскивание + кнопки окна -->
+        <Border Grid.Row="0" Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorderDark}" BorderThickness="0,0,0,1"
+                MouseLeftButtonDown="TitleBar_OnMouseLeftButtonDown">
+            <Grid Height="36">
+                <TextBlock Text="Finance Tracker" VerticalAlignment="Center" Foreground="{StaticResource CardText}" FontSize="12" Margin="12,0,0,0"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="MinimizeButton" Content="─" Style="{StaticResource TitleBarButton}" ToolTip="Свернуть" Click="MinimizeButton_OnClick"/>
+                    <Button x:Name="MaximizeRestoreButton" Content="□" Style="{StaticResource TitleBarButton}" ToolTip="Развернуть" Click="MaximizeRestoreButton_OnClick"/>
+                    <Button Content="✕" Style="{StaticResource TitleBarCloseButton}" ToolTip="Закрыть" Click="CloseButton_OnClick"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Toolbar: только кнопки транзакций -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="12,16">
+            <Button Content="Добавить" Command="{Binding AddTransactionCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" ToolTip="Добавить новую транзакцию"/>
+            <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Редактировать выбранную транзакцию"/>
+            <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Удалить выбранную транзакцию"/>
+            <Button Content="Обновить" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Обновить список транзакций"/>
         </StackPanel>
-        <!-- Ошибка отчёта (строка статуса) -->
-        <TextBlock Grid.Row="1" Text="{Binding ReportError}" Foreground="Red" Margin="8,0"/>
-        <!-- Фильтры по датам (список транзакций) -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="8">
-            <TextBlock Text="Список: с" VerticalAlignment="Center" Margin="0,0,4,0"/>
-            <DatePicker SelectedDate="{Binding StartDateFilter, Mode=TwoWay}" Margin="0,0,16,0"/>
-            <TextBlock Text="по" VerticalAlignment="Center" Margin="0,0,4,0"/>
-            <DatePicker SelectedDate="{Binding EndDateFilter, Mode=TwoWay}"/>
-        </StackPanel>
-        <!-- Период для отчёта (графики) -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="8">
-            <TextBlock Text="Отчёт: с" VerticalAlignment="Center" Margin="0,0,4,0"/>
-            <DatePicker SelectedDate="{Binding ReportStartDate, Mode=TwoWay}" Margin="0,0,16,0"/>
-            <TextBlock Text="по" VerticalAlignment="Center" Margin="0,0,4,0"/>
-            <DatePicker SelectedDate="{Binding ReportEndDate, Mode=TwoWay}"/>
-        </StackPanel>
-        <!-- Таблица слева, графики справа -->
-        <Grid Grid.Row="4" Margin="8">
+
+        <!-- Контент: Транзакции | splitter | Аналитика -->
+        <Grid Grid.Row="2" Margin="12,0,12,16">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="*" MinWidth="200"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="400" MinWidth="250"/>
             </Grid.ColumnDefinitions>
-            <DataGrid Grid.Column="0"
-                      ItemsSource="{Binding Transactions}"
-                      SelectedItem="{Binding SelectedTransaction, Mode=TwoWay}"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      Margin="0,0,8,0">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Дата" Binding="{Binding Date, StringFormat=dd.MM.yyyy}" Width="100"/>
-                    <DataGridTextColumn Header="Сумма" Binding="{Binding DisplayAmount}" Width="100"/>
-                    <DataGridTextColumn Header="Категория" Binding="{Binding Category}" Width="*"/>
-                    <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
-                </DataGrid.Columns>
-            </DataGrid>
-            <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                <TextBlock Text="{Binding ReportPromptMessage}" Visibility="{Binding IsReportPromptVisible, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8" TextWrapping="Wrap"/>
-                <TextBlock Text="{Binding ReportEmptyMessage}" Visibility="{Binding IsReportEmptyMessageVisible, Converter={StaticResource BoolToVis}}" Foreground="Gray" Margin="0,0,0,8" TextWrapping="Wrap"/>
-                <StackPanel Visibility="{Binding IsCategoryChartVisible, Converter={StaticResource BoolToVis}}">
-                    <TextBlock Text="По категориям" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                    <lvc:PieChart Series="{Binding CategoryChartSeries}" Height="250" Margin="0,0,0,16"/>
+
+            <!-- Левая колонка: Транзакции -->
+            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,0,0">
+                <StackPanel>
+                    <TextBlock Text="Транзакции" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource CardText}" Margin="0,0,0,12"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <TextBlock Text="Период:" VerticalAlignment="Center" Foreground="{StaticResource CardText}" Margin="0,0,8,0"/>
+                        <controls:DarkDatePicker SelectedDate="{Binding StartDateFilter, Mode=TwoWay}" Style="{StaticResource DarkDatePicker}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text=" — " VerticalAlignment="Center" Foreground="{StaticResource CardText}" Margin="0,0,8,0"/>
+                        <controls:DarkDatePicker SelectedDate="{Binding EndDateFilter, Mode=TwoWay}" Style="{StaticResource DarkDatePicker}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="Нет операций за период. Добавьте первую транзакцию."
+                               Visibility="{Binding IsTransactionsEmpty, Converter={StaticResource BoolToVis}}"
+                               Foreground="{StaticResource CardTextMuted}"
+                               TextAlignment="Center"
+                               Margin="0,24,0,24"/>
+                    <DataGrid ItemsSource="{Binding Transactions}"
+                              SelectedItem="{Binding SelectedTransaction, Mode=TwoWay}"
+                              Style="{StaticResource TransactionsDataGrid}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              MinHeight="200"
+                              Visibility="{Binding HasTransactions, Converter={StaticResource BoolToVis}}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Дата" Binding="{Binding Date, StringFormat=dd.MM.yyyy}" Width="100"/>
+                            <DataGridTextColumn Header="Сумма" Binding="{Binding DisplayAmount}" Width="100"/>
+                            <DataGridTextColumn Header="Категория" Binding="{Binding Category}" Width="*"/>
+                            <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </StackPanel>
-                <StackPanel Visibility="{Binding IsMonthChartVisible, Converter={StaticResource BoolToVis}}">
-                    <TextBlock Text="По месяцам" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                    <lvc:CartesianChart Series="{Binding MonthChartSeries}" XAxes="{Binding MonthChartXAxes}" Height="250"/>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                          ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                          Style="{StaticResource DarkGridSplitter}"/>
+
+            <!-- Правая колонка: Аналитика -->
+            <Border Grid.Column="2" Style="{StaticResource CardBorder}" Margin="0,0,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <TextBlock Text="Аналитика" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource CardText}" Margin="0,0,0,12"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="Период:" VerticalAlignment="Center" Foreground="{StaticResource CardText}" Margin="0,0,8,0"/>
+                        <controls:DarkDatePicker SelectedDate="{Binding ReportStartDate, Mode=TwoWay}" Style="{StaticResource DarkDatePicker}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text=" — " VerticalAlignment="Center" Foreground="{StaticResource CardText}" Margin="0,0,8,0"/>
+                        <controls:DarkDatePicker SelectedDate="{Binding ReportEndDate, Mode=TwoWay}" Style="{StaticResource DarkDatePicker}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,8">
+                        <RadioButton Content="По категориям (круговая)" IsChecked="{Binding IsChartTypeByCategory, Mode=TwoWay}" Style="{StaticResource DarkRadioButton}" Margin="0,0,0,4" ToolTip="Круговая диаграмма по категориям"/>
+                        <RadioButton Content="По месяцам (столбцы)" IsChecked="{Binding IsChartTypeByMonth, Mode=TwoWay}" Style="{StaticResource DarkRadioButton}" Margin="0,0,0,4" ToolTip="Столбчатая диаграмма по месяцам"/>
+                        <RadioButton Content="Оба" IsChecked="{Binding IsChartTypeBoth, Mode=TwoWay}" Style="{StaticResource DarkRadioButton}" Margin="0,0,0,8" ToolTip="Оба графика"/>
+                        <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Style="{StaticResource PrimaryButtonDimmedWhenGenerating}" ToolTip="Запуск аналитики по выбранному периоду" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                    <ProgressBar Style="{StaticResource ReportProgressBar}" Margin="0,0,0,12" Visibility="{Binding IsReportGenerating, Converter={StaticResource BoolToVis}}"/>
+                    <TextBlock Text="{Binding ReportError}" Foreground="Red" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding ReportPromptMessage}" Visibility="{Binding IsReportPromptVisible, Converter={StaticResource BoolToVis}}" Foreground="{StaticResource CardTextMuted}" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding ReportEmptyMessage}" Visibility="{Binding IsReportEmptyMessageVisible, Converter={StaticResource BoolToVis}}" Foreground="{StaticResource CardTextMuted}" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                    <StackPanel Visibility="{Binding IsCategoryChartVisible, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="По категориям" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource CardText}" Margin="0,0,0,8"/>
+                        <lvc:PieChart Series="{Binding CategoryChartSeries}" Height="250" Margin="0,0,0,16"/>
+                    </StackPanel>
+                    <StackPanel Visibility="{Binding IsMonthChartVisible, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="По месяцам" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource CardText}" Margin="0,0,0,8"/>
+                        <lvc:CartesianChart Series="{Binding MonthChartSeries}" XAxes="{Binding MonthChartXAxes}" Height="250"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
+                </ScrollViewer>
+            </Border>
         </Grid>
     </Grid>
 </Window>

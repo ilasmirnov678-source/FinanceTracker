@@ -1,4 +1,5 @@
 using System.IO;
+using FinanceTracker;
 using Microsoft.Data.Sqlite;
 
 namespace FinanceTracker.Services;
@@ -17,7 +18,7 @@ public class DatabaseService
     // Конструктор с опциональным путём к БД.
     public DatabaseService(string? dbPath = null)
     {
-        var path = dbPath ?? "Database/finance.db";
+        var path = dbPath ?? AppConstants.DefaultDbRelativePath;
         _dbPath = Path.IsPathRooted(path) 
             ? path 
             : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
@@ -57,9 +58,9 @@ public class DatabaseService
     // Прочитать SQL-скрипт из файла schema.sql.
     private string ReadSchemaSql()
     {
-        var schemaPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "schema.sql");
+        var schemaPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppConstants.DatabaseFolder, AppConstants.SchemaFileName);
         if (!File.Exists(schemaPath))
-            throw new FileNotFoundException($"Файл schema.sql не найден по пути: {schemaPath}", schemaPath);
+            throw new FileNotFoundException($"Файл {AppConstants.SchemaFileName} не найден по пути: {schemaPath}", schemaPath);
         return File.ReadAllText(schemaPath);
     }
 

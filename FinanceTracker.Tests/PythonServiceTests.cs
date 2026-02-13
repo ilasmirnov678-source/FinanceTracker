@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using FinanceTracker;
 using FinanceTracker.Models.Analytics;
 using FinanceTracker.Services;
 using FluentAssertions;
@@ -71,14 +72,14 @@ public class PythonServiceTests
         string tempDir = Path.GetTempPath();
         string result = PythonService.ResolvePythonPath(tempDir);
 
-        result.Should().Be("python");
+        result.Should().Be(AppConstants.PythonFallback);
     }
 
     [Fact]
     public void ResolvePythonPath_VenvExists_ReturnsVenvPath()
     {
         string tempDir = Path.Combine(Path.GetTempPath(), "FinanceTrackerTest_" + Guid.NewGuid().ToString("N"));
-        string venvPython = Path.Combine(tempDir, "PythonApp", "venv", "Scripts", "python.exe");
+        string venvPython = Path.Combine(tempDir, AppConstants.PythonAppFolder, AppConstants.VenvFolder, AppConstants.VenvScriptsFolder, AppConstants.PythonExeName);
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(venvPython)!);
@@ -89,7 +90,7 @@ public class PythonServiceTests
         finally
         {
             try { File.Delete(venvPython); } catch { }
-            try { Directory.Delete(Path.Combine(tempDir, "PythonApp"), true); } catch { }
+            try { Directory.Delete(Path.Combine(tempDir, AppConstants.PythonAppFolder), true); } catch { }
             try { Directory.Delete(tempDir, true); } catch { }
         }
     }
@@ -100,11 +101,11 @@ public class PythonServiceTests
         var service = new PythonService();
         string args = service.BuildArguments(@"C:\data\finance.db", new DateTime(2025, 2, 1), new DateTime(2025, 3, 15));
 
-        args.Should().Contain("--db");
+        args.Should().Contain(AppConstants.CliArgDb);
         args.Should().Contain(@"C:\data\finance.db");
-        args.Should().Contain("--from");
+        args.Should().Contain(AppConstants.CliArgFrom);
         args.Should().Contain("2025-02-01");
-        args.Should().Contain("--to");
+        args.Should().Contain(AppConstants.CliArgTo);
         args.Should().Contain("2025-03-15");
     }
 
