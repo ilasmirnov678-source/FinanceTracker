@@ -19,13 +19,13 @@ def parse_args():
     return parser.parse_args()
 
 
-# Чтение транзакций за период (Date >= date_from, Date < date_to) из таблицы Transactions.
+# Чтение транзакций за период (Date >= date_from, Date <= date_to) из таблицы Transactions.
 def load_transactions(conn: sqlite3.Connection, date_from: str, date_to: str) -> pd.DataFrame:
-    # Date в БД — TEXT ISO8601; фильтр включительно от date_from, исключительно до date_to
+    # Date в БД — TEXT ISO8601; фильтр включительно по обеим границам периода
     query = """
         SELECT Id, Date, Amount, Category, Description
         FROM Transactions
-        WHERE Date >= ? AND Date < ?
+        WHERE Date >= ? AND Date <= ?
         ORDER BY Date
     """
     return pd.read_sql(query, conn, params=(date_from, date_to))
