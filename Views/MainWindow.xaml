@@ -78,15 +78,16 @@
             <Button Content="Обновить" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Обновить список транзакций"/>
         </StackPanel>
 
-        <!-- Контент: две колонки — Транзакции | Аналитика -->
+        <!-- Контент: Транзакции | splitter | Аналитика -->
         <Grid Grid.Row="2" Margin="12,0,12,16">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="*" MinWidth="200"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="400" MinWidth="250"/>
             </Grid.ColumnDefinitions>
 
             <!-- Левая колонка: Транзакции -->
-            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,16,0">
+            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,0,0">
                 <StackPanel>
                     <TextBlock Text="Транзакции" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource CardText}" Margin="0,0,0,12"/>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
@@ -117,8 +118,13 @@
                 </StackPanel>
             </Border>
 
+            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                          ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                          Style="{StaticResource DarkGridSplitter}"/>
+
             <!-- Правая колонка: Аналитика -->
-            <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="16,0,0,0">
+            <Border Grid.Column="2" Style="{StaticResource CardBorder}" Margin="0,0,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel>
                     <TextBlock Text="Аналитика" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource CardText}" Margin="0,0,0,12"/>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
@@ -146,6 +152,7 @@
                         <lvc:CartesianChart Series="{Binding MonthChartSeries}" XAxes="{Binding MonthChartXAxes}" Height="250"/>
                     </StackPanel>
                 </StackPanel>
+                </ScrollViewer>
             </Border>
         </Grid>
     </Grid>

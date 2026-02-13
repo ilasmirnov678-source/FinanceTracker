@@ -270,6 +270,13 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Стиль GridSplitter под тёмную тему -->
+        <Style x:Key="DarkGridSplitter" TargetType="GridSplitter">
+            <Setter Property="Background" Value="{StaticResource CardBorderDark}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="SizeWE"/>
+        </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
