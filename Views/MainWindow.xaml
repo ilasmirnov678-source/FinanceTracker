@@ -7,7 +7,8 @@
         xmlns:controls="clr-namespace:FinanceTracker.Controls"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
-        Title="Finance Tracker" Height="450" Width="800" WindowState="Maximized">
+        Title="Finance Tracker" Height="450" Width="800" WindowState="Maximized"
+        WindowStyle="None" ResizeMode="CanResize">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <Style x:Key="PrimaryButtonDimmedWhenGenerating" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
@@ -17,15 +18,60 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="TitleBarButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource CardText}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#FF404040"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="TitleBarCloseButton" TargetType="Button" BasedOn="{StaticResource TitleBarButton}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFE81123"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid Background="{StaticResource WindowBackground}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Своя шапка: перетаскивание + кнопки окна -->
+        <Border Grid.Row="0" Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorderDark}" BorderThickness="0,0,0,1"
+                MouseLeftButtonDown="TitleBar_OnMouseLeftButtonDown">
+            <Grid Height="36">
+                <TextBlock Text="Finance Tracker" VerticalAlignment="Center" Foreground="{StaticResource CardText}" FontSize="12" Margin="12,0,0,0"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="MinimizeButton" Content="─" Style="{StaticResource TitleBarButton}" ToolTip="Свернуть" Click="MinimizeButton_OnClick"/>
+                    <Button x:Name="MaximizeRestoreButton" Content="□" Style="{StaticResource TitleBarButton}" ToolTip="Развернуть" Click="MaximizeRestoreButton_OnClick"/>
+                    <Button Content="✕" Style="{StaticResource TitleBarCloseButton}" ToolTip="Закрыть" Click="CloseButton_OnClick"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- Toolbar: только кнопки транзакций -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="12,16">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="12,16">
             <Button Content="Добавить" Command="{Binding AddTransactionCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" ToolTip="Добавить новую транзакцию"/>
             <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Редактировать выбранную транзакцию"/>
             <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Удалить выбранную транзакцию"/>
@@ -33,7 +79,7 @@
         </StackPanel>
 
         <!-- Контент: две колонки — Транзакции | Аналитика -->
-        <Grid Grid.Row="1" Margin="12,0,12,16">
+        <Grid Grid.Row="2" Margin="12,0,12,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="400"/>
