@@ -9,8 +9,8 @@ namespace FinanceTracker.ViewModels;
 public partial class TransactionFormViewModel : ObservableObject
 {
     private readonly ITransactionRepository _repository;
-    // Callback для закрытия окна с результатом (true — сохранено, false — отмена).
-    private readonly Action<bool?>? _onCloseRequested;
+    // Callback для закрытия окна: результат (true — сохранено, false — отмена) и сохранённая транзакция при успехе.
+    private readonly Action<bool?, Transaction?>? _onCloseRequested;
     // Id существующей транзакции при редактировании; null при добавлении.
     private readonly int? _existingId;
 
@@ -38,7 +38,7 @@ public partial class TransactionFormViewModel : ObservableObject
     [ObservableProperty]
     private string _categoryError = string.Empty;
 
-    public TransactionFormViewModel(ITransactionRepository repository, Action<bool?>? onCloseRequested = null, Transaction? existingTransaction = null)
+    public TransactionFormViewModel(ITransactionRepository repository, Action<bool?, Transaction?>? onCloseRequested = null, Transaction? existingTransaction = null)
     {
         _repository = repository;
         _onCloseRequested = onCloseRequested;
@@ -108,14 +108,14 @@ public partial class TransactionFormViewModel : ObservableObject
         else
             _repository.Add(transaction);
 
-        _onCloseRequested?.Invoke(true);
+        _onCloseRequested?.Invoke(true, transaction);
     }
 
     // Отменить без сохранения.
     [RelayCommand]
     private void Cancel()
     {
-        _onCloseRequested?.Invoke(false);
+        _onCloseRequested?.Invoke(false, null);
     }
 
     // Форма валидна: дата указана, сумма > 0, категория не пуста.
