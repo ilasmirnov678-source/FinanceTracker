@@ -53,6 +53,7 @@ public class PythonService : IPythonService
             StandardErrorEncoding = Encoding.UTF8,
             CreateNoWindow = true
         };
+        process.StartInfo.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
 
         process.Start();
 
