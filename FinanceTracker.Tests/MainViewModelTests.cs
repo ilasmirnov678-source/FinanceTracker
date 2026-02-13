@@ -275,4 +275,79 @@ public class MainViewModelTests
         vm.ReportPromptMessage.Should().BeEmpty();
         vm.IsReportPromptVisible.Should().BeFalse();
     }
+
+    [Fact]
+    public void ExpandDateFilterIfNeeded_WhenDateBeforeStartDateFilter_UpdatesStartDateFilter()
+    {
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+        vm.StartDateFilter = new DateTime(2025, 2, 10);
+        vm.EndDateFilter = new DateTime(2025, 2, 28);
+
+        vm.ExpandDateFilterIfNeeded(new DateTime(2025, 2, 1));
+
+        vm.StartDateFilter.Should().Be(new DateTime(2025, 2, 1));
+        vm.EndDateFilter.Should().Be(new DateTime(2025, 2, 28));
+    }
+
+    [Fact]
+    public void ExpandDateFilterIfNeeded_WhenDateAfterEndDateFilter_UpdatesEndDateFilter()
+    {
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+        vm.StartDateFilter = new DateTime(2025, 2, 1);
+        vm.EndDateFilter = new DateTime(2025, 2, 15);
+
+        vm.ExpandDateFilterIfNeeded(new DateTime(2025, 2, 28));
+
+        vm.StartDateFilter.Should().Be(new DateTime(2025, 2, 1));
+        vm.EndDateFilter.Should().Be(new DateTime(2025, 2, 28));
+    }
+
+    [Fact]
+    public void ExpandDateFilterIfNeeded_WhenDateInRange_LeavesFiltersUnchanged()
+    {
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+        var start = new DateTime(2025, 2, 1);
+        var end = new DateTime(2025, 2, 28);
+        vm.StartDateFilter = start;
+        vm.EndDateFilter = end;
+
+        vm.ExpandDateFilterIfNeeded(new DateTime(2025, 2, 15));
+
+        vm.StartDateFilter.Should().Be(start);
+        vm.EndDateFilter.Should().Be(end);
+    }
+
+    [Fact]
+    public void ExpandDateFilterIfNeeded_WhenDateEqualsBoundaries_LeavesFiltersUnchanged()
+    {
+        var mockRepo = new Mock<ITransactionRepository>();
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(new List<Transaction>());
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+        var start = new DateTime(2025, 2, 1);
+        var end = new DateTime(2025, 2, 28);
+        vm.StartDateFilter = start;
+        vm.EndDateFilter = end;
+
+        vm.ExpandDateFilterIfNeeded(new DateTime(2025, 2, 1));
+        vm.StartDateFilter.Should().Be(start);
+        vm.EndDateFilter.Should().Be(end);
+
+        vm.ExpandDateFilterIfNeeded(new DateTime(2025, 2, 28));
+        vm.StartDateFilter.Should().Be(start);
+        vm.EndDateFilter.Should().Be(end);
+    }
 }

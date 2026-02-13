@@ -66,7 +66,7 @@ public class TransactionFormViewModelTests
     {
         var mockRepo = new Mock<ITransactionRepository>();
         bool? callbackResult = null;
-        var vm = new TransactionFormViewModel(mockRepo.Object, r => callbackResult = r)
+        var vm = new TransactionFormViewModel(mockRepo.Object, (r, _) => callbackResult = r)
         {
             Date = new DateTime(2025, 2, 15),
             Amount = 100,
@@ -97,7 +97,7 @@ public class TransactionFormViewModelTests
             Description = "Old"
         };
         bool? callbackResult = null;
-        var vm = new TransactionFormViewModel(mockRepo.Object, r => callbackResult = r, existing)
+        var vm = new TransactionFormViewModel(mockRepo.Object, (r, _) => callbackResult = r, existing)
         {
             Amount = 75,
             Category = "B",
@@ -120,7 +120,7 @@ public class TransactionFormViewModelTests
     {
         var mockRepo = new Mock<ITransactionRepository>();
         bool? callbackResult = null;
-        var vm = new TransactionFormViewModel(mockRepo.Object, r => callbackResult = r);
+        var vm = new TransactionFormViewModel(mockRepo.Object, (r, _) => callbackResult = r);
 
         vm.CancelCommand.Execute(null);
 
