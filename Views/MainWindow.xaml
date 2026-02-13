@@ -18,10 +18,10 @@
 
         <!-- Toolbar: только кнопки транзакций -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="12,16">
-            <Button Content="Добавить" Command="{Binding AddTransactionCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
-            <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0"/>
-            <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0"/>
-            <Button Content="Обновить" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0"/>
+            <Button Content="Добавить" Command="{Binding AddTransactionCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" ToolTip="Добавить новую транзакцию"/>
+            <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Редактировать выбранную транзакцию"/>
+            <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Удалить выбранную транзакцию"/>
+            <Button Content="Обновить" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Обновить список транзакций"/>
         </StackPanel>
 
         <!-- Контент: две колонки — Транзакции | Аналитика -->
@@ -41,11 +41,17 @@
                         <TextBlock Text="–" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <DatePicker SelectedDate="{Binding EndDateFilter, Mode=TwoWay}"/>
                     </StackPanel>
+                    <TextBlock Text="Нет операций за период. Добавьте первую транзакцию."
+                               Visibility="{Binding IsTransactionsEmpty, Converter={StaticResource BoolToVis}}"
+                               Foreground="{StaticResource SecondaryText}"
+                               TextAlignment="Center"
+                               Margin="0,24,0,24"/>
                     <DataGrid ItemsSource="{Binding Transactions}"
                               SelectedItem="{Binding SelectedTransaction, Mode=TwoWay}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
-                              MinHeight="200">
+                              MinHeight="200"
+                              Visibility="{Binding HasTransactions, Converter={StaticResource BoolToVis}}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Дата" Binding="{Binding Date, StringFormat=dd.MM.yyyy}" Width="100"/>
                             <DataGridTextColumn Header="Сумма" Binding="{Binding DisplayAmount}" Width="100"/>
@@ -67,8 +73,8 @@
                         <DatePicker SelectedDate="{Binding ReportEndDate, Mode=TwoWay}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <ComboBox ItemsSource="{Binding ReportChartTypeItems}" SelectedItem="{Binding SelectedReportChartTypeItem, Mode=TwoWay}" DisplayMemberPath="Display" MinWidth="220" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Style="{StaticResource PrimaryButton}"/>
+                        <ComboBox ItemsSource="{Binding ReportChartTypeItems}" SelectedItem="{Binding SelectedReportChartTypeItem, Mode=TwoWay}" DisplayMemberPath="Display" MinWidth="220" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="Тип отображаемых графиков: по категориям, по месяцам или оба"/>
+                        <Button Content="Создать отчёт" Command="{Binding GenerateReportCommand}" Style="{StaticResource PrimaryButton}" ToolTip="Запуск аналитики по выбранному периоду"/>
                     </StackPanel>
                     <TextBlock Text="{Binding ReportError}" Foreground="Red" Margin="0,0,0,8" TextWrapping="Wrap"/>
                     <TextBlock Text="{Binding ReportPromptMessage}" Visibility="{Binding IsReportPromptVisible, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8" TextWrapping="Wrap"/>
