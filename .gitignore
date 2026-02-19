@@ -16,7 +16,6 @@ report.png
 PythonApp/venv/
 PythonApp/__pycache__/
 *.pyc
-requirements.txt
 
 # IDE и ОС
 .idea/
