@@ -24,14 +24,14 @@ public class PythonService : IPythonService
         _scriptPath = Path.Combine(_baseDirectory, AppConstants.PythonAppFolder, AppConstants.AnalyzerScriptName);
     }
 
-    // Для тестов: задаёт базовую директорию (например, без PythonApp для проверки FileNotFoundException).
+    // Для тестов: задать базовую директорию (например, без PythonApp — проверка FileNotFoundException).
     internal PythonService(string baseDirectory)
     {
         _baseDirectory = baseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         _scriptPath = Path.Combine(_baseDirectory, AppConstants.PythonAppFolder, AppConstants.AnalyzerScriptName);
     }
 
-    // Запускает analyzer.py (путь к БД, период from–to), таймаут по константе; читает stdout/stderr, парсит JSON в AnalyticsResult. Выбрасывает FileNotFoundException, InvalidOperationException (таймаут, ненулевой exit code, ошибка парсинга), OperationCanceledException при отмене токена.
+    // Запустить analyzer.py (путь к БД, период from–to), прочитать stdout/stderr, распарсить JSON в AnalyticsResult. Таймаут по константе. Выброс: FileNotFoundException, InvalidOperationException (таймаут, ненулевой exit code, ошибка парсинга), OperationCanceledException при отмене.
     public async Task<AnalyticsResult> GenerateReportAsync(string dbPath, DateTime from, DateTime to, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(_scriptPath))
@@ -65,7 +65,7 @@ public class PythonService : IPythonService
             try { process.Kill(); } catch { /* игнор при уже завершённом процессе */ }
         });
 
-        // Чтение потоков отменяем только по запросу пользователя, чтобы при таймауте успеть прочитать stderr.
+        // При таймауте сначала дочитать stderr; отмену чтения потоков выполнять только при отмене пользователем.
         var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
         var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
 
@@ -92,7 +92,7 @@ public class PythonService : IPythonService
         return DeserializeResult(stdout);
     }
 
-    // Сначала venv в PythonApp (Scripts/python.exe), иначе исполняемый "python" из PATH.
+    // Определить путь к Python: сначала venv в PythonApp/Scripts/python.exe, иначе исполняемый python из PATH.
     internal static string ResolvePythonPath(string baseDir)
     {
         string venvPython = Path.Combine(baseDir, AppConstants.PythonAppFolder, AppConstants.VenvFolder, AppConstants.VenvScriptsFolder, AppConstants.PythonExeName);
@@ -101,10 +101,10 @@ public class PythonService : IPythonService
         return AppConstants.PythonFallback;
     }
 
-    // Внешний вызов без инжекта baseDir использует поле _baseDirectory.
+    // Вызвать ResolvePythonPath для _baseDirectory (используется из публичного API).
     private string ResolvePythonPath() => ResolvePythonPath(_baseDirectory);
 
-    // Строка аргументов для analyzer.py: путь к скрипту, --db, --from (yyyy-MM-dd), --to (yyyy-MM-dd).
+    // Собрать аргументы CLI: путь к скрипту, --db, --from, --to (даты yyyy-MM-dd).
     internal string BuildArguments(string dbPath, DateTime from, DateTime to)
     {
         string fromStr = from.ToString("yyyy-MM-dd");
@@ -112,7 +112,7 @@ public class PythonService : IPythonService
         return $"\"{_scriptPath}\" {AppConstants.CliArgDb} \"{dbPath}\" {AppConstants.CliArgFrom} {fromStr} {AppConstants.CliArgTo} {toStr}";
     }
 
-    // Парсит JSON в AnalyticsResult (контракт: by_category, by_month, total). InvalidOperationException при пустом выводе или неверном JSON.
+    // Распарсить JSON в AnalyticsResult (контракт: by_category, by_month, total). Выброс InvalidOperationException при пустом выводе или неверном JSON.
     internal static AnalyticsResult DeserializeResult(string json)
     {
         if (string.IsNullOrWhiteSpace(json))

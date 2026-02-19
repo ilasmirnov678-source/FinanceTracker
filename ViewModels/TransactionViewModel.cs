@@ -3,7 +3,7 @@ using FinanceTracker.Models;
 
 namespace FinanceTracker.ViewModels;
 
-// Обёртка над Transaction для отображения и привязки в UI.
+// Обёртка Transaction для отображения и двусторонней привязки в UI.
 public partial class TransactionViewModel : ObservableObject
 {
     [ObservableProperty]
@@ -18,10 +18,10 @@ public partial class TransactionViewModel : ObservableObject
     [ObservableProperty]
     private string _description = string.Empty;
 
-    // Id транзакции (только для чтения).
+    // Id транзакции; только чтение.
     public int Id { get; }
 
-    // Исходная модель для работы с репозиторием.
+    // Исходная модель (используется репозиторием при обновлении).
     public Transaction Model { get; }
 
     public TransactionViewModel(Transaction transaction)
@@ -34,7 +34,7 @@ public partial class TransactionViewModel : ObservableObject
         _description = transaction.Description;
     }
 
-    // Сумма в формате для отображения в UI.
+    // Сумма в формате отображения в списке (например "1 234,56 руб.").
     public string DisplayAmount => $"{Amount:N2} руб.";
 
     partial void OnDateChanged(DateTime value) => Model.Date = value;

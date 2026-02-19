@@ -4,18 +4,18 @@ using Microsoft.Data.Sqlite;
 
 namespace FinanceTracker.Services;
 
-// Сервис для инициализации и управления подключением к базе данных SQLite.
+// Инициализация и управление подключением к SQLite.
 public class DatabaseService
 {
     private readonly string _dbPath;
 
-    // Путь к файлу базы данных.
+    // Путь к файлу БД.
     public string DbPath => _dbPath;
 
-    // Строка подключения к базе данных.
+    // Строка подключения к БД.
     public string ConnectionString => "Data Source=" + _dbPath;
 
-    // Конструктор с опциональным путём к БД.
+    // Инициализировать сервис; путь к БД опционален (по умолчанию — Database/finance.db).
     public DatabaseService(string? dbPath = null)
     {
         var path = dbPath ?? AppConstants.DefaultDbRelativePath;

@@ -2,7 +2,7 @@ using Microsoft.Data.Sqlite;
 
 namespace FinanceTracker.Tests.Helpers;
 
-// Хелпер для создания in-memory SQLite БД с тестовой схемой.
+// Создать in-memory SQLite БД с тестовой схемой (таблица Transactions).
 public static class InMemoryDbHelper
 {
     public const string CreateTableSql = """

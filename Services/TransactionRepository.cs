@@ -3,12 +3,12 @@ using FinanceTracker.Models;
 
 namespace FinanceTracker.Services;
 
-// Репозиторий для работы с таблицей Transactions. Не создаёт БД и таблицы.
+// Работа с таблицей Transactions; БД и таблицы не создаёт (создаёт DatabaseService).
 public class TransactionRepository : ITransactionRepository
 {
     private readonly string _connectionString;
 
-    // Путь к файлу БД или строка подключения; при первом запуске БД создаётся сервисом.
+    // Принять путь к файлу БД или готовую строку подключения.
     public TransactionRepository(string connectionStringOrPath)
     {
         if (string.IsNullOrWhiteSpace(connectionStringOrPath))
@@ -90,7 +90,7 @@ public class TransactionRepository : ITransactionRepository
         command.ExecuteNonQuery();
     }
 
-    // Маппинг строки результата в объект Transaction.
+    // Преобразовать строку результата запроса в объект Transaction.
     private static Transaction MapRowToTransaction(SqliteDataReader reader)
     {
         return new Transaction

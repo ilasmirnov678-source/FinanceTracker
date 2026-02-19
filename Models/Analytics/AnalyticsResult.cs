@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace FinanceTracker.Models.Analytics;
 
-// Результат аналитики analyzer.py (контракт JSON: by_category, by_month, total).
+// Результат аналитики analyzer.py; контракт JSON: by_category, by_month, total.
 public class AnalyticsResult
 {
     [JsonPropertyName("by_category")]

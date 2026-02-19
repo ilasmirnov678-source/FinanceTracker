@@ -5,13 +5,13 @@ using FinanceTracker.Services;
 
 namespace FinanceTracker.ViewModels;
 
-// ViewModel формы добавления транзакции.
+// ViewModel формы добавления или редактирования транзакции.
 public partial class TransactionFormViewModel : ObservableObject
 {
     private readonly ITransactionRepository _repository;
-    // Callback для закрытия окна: результат (true — сохранено, false — отмена) и сохранённая транзакция при успехе.
+    // Вызов при закрытии окна: результат (true — сохранено, false — отмена) и сохранённая транзакция при успехе.
     private readonly Action<bool?, Transaction?>? _onCloseRequested;
-    // Id существующей транзакции при редактировании; null при добавлении.
+    // Id редактируемой транзакции; null при добавлении новой.
     private readonly int? _existingId;
 
     [ObservableProperty]
@@ -82,11 +82,11 @@ public partial class TransactionFormViewModel : ObservableObject
             CategoryError = string.Empty;
     }
 
-    // Сохранить транзакцию в БД и закрыть форму.
+    // Сохранить транзакцию в БД и вызвать callback закрытия.
     [RelayCommand]
     private void Save()
     {
-        // Валидация при попытке сохранения.
+        // Проверить поля и установить сообщения об ошибках.
         DateError = Date.HasValue ? string.Empty : "Укажите дату";
         AmountError = Amount.HasValue && Amount.Value > 0 ? string.Empty : "Сумма должна быть больше 0";
         CategoryError = !string.IsNullOrWhiteSpace(Category) ? string.Empty : "Укажите категорию";
@@ -111,13 +111,13 @@ public partial class TransactionFormViewModel : ObservableObject
         _onCloseRequested?.Invoke(true, transaction);
     }
 
-    // Отменить без сохранения.
+    // Закрыть форму без сохранения.
     [RelayCommand]
     private void Cancel()
     {
         _onCloseRequested?.Invoke(false, null);
     }
 
-    // Форма валидна: дата указана, сумма > 0, категория не пуста.
+    // Проверить, что форма готова к сохранению: дата, сумма > 0, категория не пуста.
     private bool CanSave() => Date.HasValue && Amount.HasValue && Amount.Value > 0 && !string.IsNullOrWhiteSpace(Category);
 }

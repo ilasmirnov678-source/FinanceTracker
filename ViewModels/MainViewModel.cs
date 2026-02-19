@@ -34,13 +34,13 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<TransactionViewModel> Transactions { get; }
 
-    // Выбранная транзакция в списке (для редактирования и удаления).
+    // Текущая выбранная транзакция в списке (редактирование, удаление).
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(EditTransactionCommand))]
     [NotifyCanExecuteChangedFor(nameof(DeleteTransactionCommand))]
     private TransactionViewModel? _selectedTransaction;
 
-    // Список выбранных транзакций (заполняется из MainWindow при SelectionChanged).
+    // Выбранные транзакции (заполняется из MainWindow при SelectionChanged).
     private List<TransactionViewModel> _selectedTransactions = new();
     public IReadOnlyList<TransactionViewModel> SelectedTransactions => _selectedTransactions;
 
@@ -59,29 +59,23 @@ public partial class MainViewModel : ObservableObject
         (DeleteTransactionCommand as RelayCommand)?.NotifyCanExecuteChanged();
     }
 
-    // Начало периода для фильтрации.
+    // Начало и конец периода фильтрации списка транзакций.
     [ObservableProperty]
     private DateTime _startDateFilter;
-
-    // Конец периода для фильтрации.
     [ObservableProperty]
     private DateTime _endDateFilter;
 
-    // Начало периода для отчёта (графики).
+    // Начало и конец периода для отчёта (графики).
     [ObservableProperty]
     private DateTime _reportStartDate;
-
-    // Конец периода для отчёта (графики).
     [ObservableProperty]
     private DateTime _reportEndDate;
 
-    // Серии для круговой диаграммы по категориям.
+    // Серии круговой диаграммы по категориям.
     public ObservableCollection<ISeries> CategoryChartSeries { get; } = new();
-
-    // Серии для столбчатой диаграммы по месяцам.
+    // Серии столбчатой диаграммы по месяцам.
     public ObservableCollection<ISeries> MonthChartSeries { get; } = new();
-
-    // Подписи оси X для графика по месяцам (yyyy-MM).
+    // Подписи оси X графика по месяцам (формат yyyy-MM).
     public ObservableCollection<Axis> MonthChartXAxes { get; } = new();
 
     [ObservableProperty]
@@ -138,7 +132,7 @@ public partial class MainViewModel : ObservableObject
         set { if (value) SelectedReportChartTypeItem = ReportChartTypeItems.First(x => x.Value == ReportChartType.Both); }
     }
 
-    // Пустой список транзакций за выбранный период (для заглушки в левой панели).
+    // Признак пустого списка за период (заглушка в левой панели).
     public bool IsTransactionsEmpty => Transactions.Count == 0;
 
     public bool HasTransactions => !IsTransactionsEmpty;
@@ -228,7 +222,7 @@ public partial class MainViewModel : ObservableObject
     private bool CanEdit() => HasSingleSelection;
     private bool CanDelete() => HasAnySelection;
 
-    // Расширить период отображения, если дата транзакции вне текущего диапазона. Internal для тестов.
+    // Расширить период фильтрации, если дата транзакции выходит за текущий диапазон (internal для тестов).
     internal void ExpandDateFilterIfNeeded(DateTime transactionDate)
     {
         var date = transactionDate.Date;
@@ -263,6 +257,7 @@ public partial class MainViewModel : ObservableObject
 
     private bool CanGenerateReport() => !IsReportGenerating;
 
+    // Обновить серии графиков по результату аналитики (категории и месяцы).
     private void UpdateChartSeries(AnalyticsResult result)
     {
         ReportEmptyMessage = result.ByCategory.Count == 0 && result.ByMonth.Count == 0

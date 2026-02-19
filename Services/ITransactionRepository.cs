@@ -1,7 +1,7 @@
 using FinanceTracker.Models;
 namespace FinanceTracker.Services;
 
-// Репозиторий для работы с транзакциями. Позволяет подменять реализацию в тестах.
+// Контракт репозитория транзакций; подмена реализации в тестах.
 public interface ITransactionRepository
 {
     List<Transaction> GetAll();

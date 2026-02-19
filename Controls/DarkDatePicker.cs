@@ -5,11 +5,8 @@ using System.Windows.Media;
 
 namespace FinanceTracker.Controls;
 
-/// <summary>
-/// DatePicker, у которого выпадающий календарь получает ресурсы приложения (тёмные стили).
-/// Popup в WPF отображает содержимое в отдельном окне без Application.Resources,
-/// поэтому календарь оборачивается в Border и явно задаётся стиль из Themes/CalendarDark.xaml.
-/// </summary>
+// DatePicker с тёмным календарём: Popup в WPF не наследует Application.Resources,
+// поэтому содержимое оборачивается в Border и подключаются стили из Themes/CalendarDark.xaml.
 public class DarkDatePicker : DatePicker
 {
     public override void OnApplyTemplate()
@@ -31,6 +28,7 @@ public class DarkDatePicker : DatePicker
             WrapPopupContentWithAppResources(popup);
     }
 
+    // Обернуть содержимое Popup в Border с ResourceDictionary, чтобы календарь получил тёмные стили.
     private static void WrapPopupContentWithAppResources(Popup popup)
     {
         if (popup.Child == null || popup.Child is Border)
@@ -65,6 +63,7 @@ public class DarkDatePicker : DatePicker
         popup.Opened += ApplyThemeToCalendarParts;
     }
 
+    // Применить стили из словаря к дочерним элементам календаря (CalendarItem, CalendarButton, CalendarDayButton и т.д.).
     private static void ApplyStylesToDescendants(DependencyObject parent, ResourceDictionary theme)
     {
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -86,6 +85,7 @@ public class DarkDatePicker : DatePicker
         }
     }
 
+    // Проверить, есть ли у элемента предок указанного типа (для выборочного применения стилей).
     private static bool HasAncestor(DependencyObject element, Type ancestorType)
     {
         for (var parent = VisualTreeHelper.GetParent(element); parent != null; parent = VisualTreeHelper.GetParent(parent))

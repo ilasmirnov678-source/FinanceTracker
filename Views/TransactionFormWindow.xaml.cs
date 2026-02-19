@@ -5,10 +5,10 @@ using FinanceTracker.ViewModels;
 
 namespace FinanceTracker.Views;
 
-// Окно добавления или редактирования транзакции.
+// Окно добавления или редактирования одной транзакции.
 public partial class TransactionFormWindow : Window
 {
-    // Сохранённая транзакция при успешном Save; null при отмене.
+    // Результат при успешном сохранении; null при отмене.
     public Transaction? SavedTransaction { get; private set; }
 
     public TransactionFormWindow(ITransactionRepository repository, Transaction? existingTransaction = null)
@@ -17,7 +17,7 @@ public partial class TransactionFormWindow : Window
         DataContext = new TransactionFormViewModel(repository, OnCloseRequested, existingTransaction);
     }
 
-    // Установить SavedTransaction, DialogResult и закрыть окно (вызывается из ViewModel).
+    // Обработать закрытие: сохранить результат и транзакцию в свойства, закрыть окно (вызов из ViewModel).
     private void OnCloseRequested(bool? result, Transaction? savedTransaction)
     {
         SavedTransaction = savedTransaction;

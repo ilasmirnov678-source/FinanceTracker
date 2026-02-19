@@ -3,10 +3,10 @@ using System.Windows.Data;
 
 namespace FinanceTracker.Converters;
 
-// Конвертер для привязки TextBox к decimal? (пустая строка = null).
+// Привязка TextBox к decimal?; пустая строка трактуется как null.
 public class DecimalConverter : IValueConverter
 {
-    // decimal? -> string для отображения в TextBox.
+    // Преобразовать decimal? в строку для отображения в TextBox.
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is decimal d)
@@ -14,13 +14,13 @@ public class DecimalConverter : IValueConverter
         return string.Empty;
     }
 
-    // string -> decimal? при вводе; пустая строка = null (позволяет очистить поле).
+    // Преобразовать ввод в decimal?; пустая строка — null. Позволяет очистить поле.
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is not string s || string.IsNullOrWhiteSpace(s))
             return null;
         var trimmed = s.Trim();
-        // Не обновлять источник при промежуточном вводе (10. или 10,).
+        // Не обновлять источник при незавершённом вводе (например "10." или "10,").
         if (trimmed.EndsWith('.') || trimmed.EndsWith(','))
             return Binding.DoNothing;
         if (decimal.TryParse(s.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var result))

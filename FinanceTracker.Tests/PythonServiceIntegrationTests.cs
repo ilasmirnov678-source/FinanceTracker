@@ -9,7 +9,7 @@ using Xunit;
 
 namespace FinanceTracker.Tests;
 
-// Интеграционный тест: реальный запуск analyzer.py, временная файловая БД. Требует Python и pandas.
+// Интеграционные тесты: реальный запуск analyzer.py и временная файловая БД; требуют Python и pandas.
 public class PythonServiceIntegrationTests
 {
     private static string CreateTempDbWithData()
@@ -80,11 +80,11 @@ public class PythonServiceIntegrationTests
         }
         catch (IOException)
         {
-            // Файл может быть ещё занят (антивирус, задержка освобождения).
+            // Игнорировать: файл может быть ещё занят (антивирус, задержка освобождения).
         }
     }
 
-    // Временная директория с PythonApp/analyzer.py (произвольное содержимое) и пустым файлом БД.
+    // Создать временную директорию с PythonApp/analyzer.py (произвольное содержимое) и пустым файлом БД.
     private static (string tempDir, string dbPath) CreateTempDirWithAnalyzer(string analyzerScriptContent)
     {
         string tempDir = Path.Combine(Path.GetTempPath(), "FinanceTrackerTest_" + Guid.NewGuid().ToString("N"));
