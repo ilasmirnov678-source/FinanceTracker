@@ -78,6 +78,16 @@
             </Setter>
         </Style>
 
+        <!-- Вторичная кнопка с подсветкой цветом «Добавить», когда доступна -->
+        <Style x:Key="SecondaryButtonHighlightWhenEnabled" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="True">
+                    <Setter Property="Background" Value="{StaticResource AccentGreen}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <!-- Стиль ComboBox под тёмную тему (пункты списка: тёмный фон, светлый текст, подсветка без синего) -->
         <Style x:Key="DarkComboBoxItem" TargetType="ComboBoxItem">
             <Setter Property="Background" Value="{StaticResource CardBackground}"/>
@@ -247,6 +257,7 @@
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="RowHeaderWidth" Value="0"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
             <Setter Property="Background" Value="{StaticResource CardBackground}"/>
             <Setter Property="Foreground" Value="{StaticResource CardText}"/>
             <Setter Property="RowBackground" Value="{StaticResource CardBackground}"/>
@@ -255,6 +266,32 @@
             <Setter Property="VerticalGridLinesBrush" Value="{StaticResource CardBorderDark}"/>
             <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource CardBorderDark}"/>
             <Setter Property="ColumnHeaderStyle" Value="{StaticResource TransactionsColumnHeader}"/>
+            <Setter Property="RowStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#FF404040"/>
+                                <Setter Property="Foreground" Value="{StaticResource CardText}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <!-- Выделение рисуют ячейки; без CellStyle используется системная синяя кисть -->
+            <Setter Property="CellStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridCell">
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#FF404040"/>
+                                <Setter Property="Foreground" Value="{StaticResource CardText}"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Стиль карточки (Border): тёмный фон, скругление 8, рамка -->
@@ -271,11 +308,18 @@
             </Setter>
         </Style>
 
-        <!-- Стиль GridSplitter под тёмную тему -->
+        <!-- Стиль GridSplitter под тёмную тему (свой шаблон без белого превью при перетаскивании) -->
         <Style x:Key="DarkGridSplitter" TargetType="GridSplitter">
             <Setter Property="Background" Value="{StaticResource CardBorderDark}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="SizeWE"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridSplitter">
+                        <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         </ResourceDictionary>
     </Application.Resources>

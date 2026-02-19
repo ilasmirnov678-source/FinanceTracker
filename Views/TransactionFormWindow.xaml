@@ -49,7 +49,7 @@
             <controls:DarkDatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding Date, Mode=TwoWay}" Style="{StaticResource DarkDatePicker}" Margin="0,0,0,8"/>
             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DateError}" Foreground="Red" FontSize="11" Margin="0,0,0,12"/>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Сумма:" VerticalAlignment="Center" Foreground="{StaticResource CardText}" Margin="0,0,8,8"/>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Сумма(руб.):" VerticalAlignment="Center" Foreground="{StaticResource CardText}" Margin="0,0,8,8"/>
             <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource DarkTextBox}" Text="{Binding Amount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DecimalConverter}}" Margin="0,0,0,8"/>
             <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AmountError}" Foreground="Red" FontSize="11" Margin="0,0,0,12"/>
 

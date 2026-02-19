@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -38,6 +39,25 @@ public partial class MainViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(EditTransactionCommand))]
     [NotifyCanExecuteChangedFor(nameof(DeleteTransactionCommand))]
     private TransactionViewModel? _selectedTransaction;
+
+    // Список выбранных транзакций (заполняется из MainWindow при SelectionChanged).
+    private List<TransactionViewModel> _selectedTransactions = new();
+    public IReadOnlyList<TransactionViewModel> SelectedTransactions => _selectedTransactions;
+
+    public int SelectedTransactionsCount => _selectedTransactions.Count;
+    public bool HasSingleSelection => SelectedTransactionsCount == 1;
+    public bool HasAnySelection => SelectedTransactionsCount > 0;
+
+    public void SetSelectedTransactions(IEnumerable<TransactionViewModel> selected)
+    {
+        _selectedTransactions = selected?.ToList() ?? new List<TransactionViewModel>();
+        OnPropertyChanged(nameof(SelectedTransactions));
+        OnPropertyChanged(nameof(SelectedTransactionsCount));
+        OnPropertyChanged(nameof(HasSingleSelection));
+        OnPropertyChanged(nameof(HasAnySelection));
+        (EditTransactionCommand as RelayCommand)?.NotifyCanExecuteChanged();
+        (DeleteTransactionCommand as RelayCommand)?.NotifyCanExecuteChanged();
+    }
 
     // Начало периода для фильтрации.
     [ObservableProperty]
@@ -159,7 +179,7 @@ public partial class MainViewModel : ObservableObject
     }
 
     // Редактировать выбранную транзакцию.
-    [RelayCommand(CanExecute = nameof(CanEditOrDelete))]
+    [RelayCommand(CanExecute = nameof(CanEdit))]
     private void EditTransaction()
     {
         if (SelectedTransaction == null) return;
@@ -175,18 +195,23 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    // Удалить выбранную транзакцию.
-    [RelayCommand(CanExecute = nameof(CanEditOrDelete))]
+    // Удалить выбранные транзакции (одну или несколько).
+    [RelayCommand(CanExecute = nameof(CanDelete))]
     private void DeleteTransaction()
     {
-        if (SelectedTransaction == null) return;
-        if (MessageBox.Show(
-                $"Удалить транзакцию от {SelectedTransaction.Date:dd.MM.yyyy} ({SelectedTransaction.Amount:N2} руб., {SelectedTransaction.Category})?",
-                "Подтверждение удаления",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question) != MessageBoxResult.Yes)
+        if (SelectedTransactionsCount == 0) return;
+        string message;
+        if (SelectedTransactionsCount == 1)
+        {
+            var t = _selectedTransactions[0];
+            message = $"Удалить транзакцию от {t.Date:dd.MM.yyyy} ({t.Amount:N2} руб., {t.Category})?";
+        }
+        else
+            message = $"Удалить транзакции ({SelectedTransactionsCount})?";
+        if (MessageBox.Show(message, "Подтверждение удаления", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
             return;
-        _repository.Delete(SelectedTransaction.Id);
+        foreach (var t in _selectedTransactions)
+            _repository.Delete(t.Id);
         RefreshCommand.Execute(null);
     }
 
@@ -200,7 +225,8 @@ public partial class MainViewModel : ObservableObject
             Transactions.Add(new TransactionViewModel(t));
     }
 
-    private bool CanEditOrDelete() => SelectedTransaction != null;
+    private bool CanEdit() => HasSingleSelection;
+    private bool CanDelete() => HasAnySelection;
 
     // Расширить период отображения, если дата транзакции вне текущего диапазона. Internal для тестов.
     internal void ExpandDateFilterIfNeeded(DateTime transactionDate)

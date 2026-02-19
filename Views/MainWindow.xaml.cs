@@ -1,4 +1,6 @@
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using FinanceTracker.Services;
 using FinanceTracker.ViewModels;
@@ -78,6 +80,13 @@ namespace FinanceTracker.Views
         private void CloseButton_OnClick(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void TransactionsDataGrid_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DataContext is not MainViewModel vm) return;
+            var selected = TransactionsDataGrid.SelectedItems.Cast<TransactionViewModel>().ToList();
+            vm.SetSelectedTransactions(selected);
         }
     }
 }

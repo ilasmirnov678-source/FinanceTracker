@@ -68,7 +68,7 @@ public class MainViewModelTests
     }
 
     [Fact]
-    public void CanEditOrDelete_ReturnsFalse_WhenNoSelection()
+    public void CanEdit_And_CanDelete_ReturnFalse_WhenNoSelection()
     {
         var mockRepo = new Mock<ITransactionRepository>();
         mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -76,14 +76,14 @@ public class MainViewModelTests
         var (mockPython, dbPath) = CreatePythonServiceAndPath();
 
         var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
-        vm.SelectedTransaction = null;
+        vm.SetSelectedTransactions([]);
 
         vm.EditTransactionCommand.CanExecute(null).Should().BeFalse();
         vm.DeleteTransactionCommand.CanExecute(null).Should().BeFalse();
     }
 
     [Fact]
-    public void CanEditOrDelete_ReturnsTrue_WhenSelected()
+    public void CanEdit_And_CanDelete_ReturnTrue_WhenSingleSelected()
     {
         var mockRepo = new Mock<ITransactionRepository>();
         var transaction = new Transaction
@@ -99,9 +99,32 @@ public class MainViewModelTests
         var (mockPython, dbPath) = CreatePythonServiceAndPath();
 
         var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
-        vm.SelectedTransaction = vm.Transactions[0];
+        vm.SetSelectedTransactions(vm.Transactions);
 
         vm.EditTransactionCommand.CanExecute(null).Should().BeTrue();
+        vm.DeleteTransactionCommand.CanExecute(null).Should().BeTrue();
+    }
+
+    [Fact]
+    public void CanEdit_ReturnsFalse_CanDelete_ReturnsTrue_WhenMultipleSelected()
+    {
+        var mockRepo = new Mock<ITransactionRepository>();
+        var transactions = new List<Transaction>
+        {
+            new() { Id = 1, Date = DateTime.Today, Amount = 100, Category = "A", Description = "" },
+            new() { Id = 2, Date = DateTime.Today, Amount = 200, Category = "B", Description = "" }
+        };
+        mockRepo.Setup(r => r.GetByDateRange(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Returns(transactions);
+        var (mockPython, dbPath) = CreatePythonServiceAndPath();
+
+        var vm = new MainViewModel(mockRepo.Object, mockPython.Object, dbPath);
+        vm.SetSelectedTransactions(vm.Transactions);
+
+        vm.SelectedTransactionsCount.Should().Be(2);
+        vm.HasSingleSelection.Should().BeFalse();
+        vm.HasAnySelection.Should().BeTrue();
+        vm.EditTransactionCommand.CanExecute(null).Should().BeFalse();
         vm.DeleteTransactionCommand.CanExecute(null).Should().BeTrue();
     }
 

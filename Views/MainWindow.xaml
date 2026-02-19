@@ -73,9 +73,9 @@
         <!-- Toolbar: только кнопки транзакций -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="12,16">
             <Button Content="Добавить" Command="{Binding AddTransactionCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" ToolTip="Добавить новую транзакцию"/>
-            <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Редактировать выбранную транзакцию"/>
-            <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Удалить выбранную транзакцию"/>
-            <Button Content="Обновить" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" ToolTip="Обновить список транзакций"/>
+            <Button Content="Редактировать" Command="{Binding EditTransactionCommand}" Style="{StaticResource SecondaryButtonHighlightWhenEnabled}" Margin="0,0,8,0" ToolTip="Редактировать выбранную транзакцию"/>
+            <Button Content="Удалить" Command="{Binding DeleteTransactionCommand}" Style="{StaticResource SecondaryButtonHighlightWhenEnabled}" Margin="0,0,8,0" ToolTip="Удалить выбранную транзакцию или выбранные транзакции"/>
+            <Button Content="Обновить" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButtonHighlightWhenEnabled}" Margin="0,0,8,0" ToolTip="Обновить список транзакций"/>
         </StackPanel>
 
         <!-- Контент: Транзакции | splitter | Аналитика -->
@@ -101,8 +101,12 @@
                                Foreground="{StaticResource CardTextMuted}"
                                TextAlignment="Center"
                                Margin="0,24,0,24"/>
-                    <DataGrid ItemsSource="{Binding Transactions}"
+                    <DataGrid x:Name="TransactionsDataGrid"
+                              ItemsSource="{Binding Transactions}"
                               SelectedItem="{Binding SelectedTransaction, Mode=TwoWay}"
+                              SelectionMode="Extended"
+                              SelectionUnit="FullRow"
+                              SelectionChanged="TransactionsDataGrid_OnSelectionChanged"
                               Style="{StaticResource TransactionsDataGrid}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
